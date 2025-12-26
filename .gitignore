@@ -24,4 +24,7 @@ Thumbs.db
 .svelte-kit/
 
 # Testing
-coverage/
+coverage/ 
+
+# Design files
+plans/
