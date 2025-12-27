@@ -2,15 +2,32 @@
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
     import { page } from '$app/stores';
-    import { Button, Card, Table, EmptyState, Modal, Input, ConfirmDialog } from '$lib/components';
-    import { propertyService, unitService, tenantService } from '$lib/services';
-    import type { Property, Unit, Tenant, UnitFormData, TenantFormData } from '$lib/types';
+    import { Button, Card, Table, EmptyState, Modal, Input, ConfirmDialog, GrantAccessModal, AccessList } from '$lib/components';
+    import { propertyService, unitService, tenantService, userAccessService } from '$lib/services';
+    import type { Property, Unit, Tenant, UnitFormData, UserAccess } from '$lib/types';
+
+    interface TenantFormData {
+        first_name: string;
+        last_name: string;
+        preferred_name: string;
+        id_card_number: string;
+        phone: string;
+        property: string;
+        unit: string;
+        active: boolean;
+    }
 
     let property = $state<Property | null>(null);
     let units = $state<Unit[]>([]);
     let tenants = $state<Tenant[]>([]);
+    let accessList = $state<UserAccess[]>([]);
     let loading = $state(true);
     let error = $state<string | null>(null);
+
+    // User role for this property
+    let userRole = $state<'owner' | 'manager' | 'viewer' | null>(null);
+    let canManageAccess = $derived(userRole === 'owner');
+    let canEdit = $derived(userRole === 'owner' || userRole === 'manager');
 
     // Unit modal
     let unitModalOpen = $state(false);
@@ -36,6 +53,9 @@
     // Delete confirmation
     let deleteDialogOpen = $state(false);
     let deleteTarget = $state<{ type: 'property' | 'unit' | 'tenant'; id: string; name: string } | null>(null);
+
+    // Access management
+    let grantAccessModalOpen = $state(false);
 
     const unitColumns = [
         { key: 'unit_number', label: 'Unit #' },
@@ -66,43 +86,44 @@
             return;
         }
 
-        console.log('Loading property with ID:', propertyId);
-
-        // Load property first
         try {
-            console.log('Fetching property...');
             property = await propertyService.getById(propertyId);
-            console.log('Property loaded:', property);
+            
+            // Check user's role for this property
+            userRole = await userAccessService.getUserRole(propertyId);
+
+            // Load units and tenants
+            const [unitsData, tenantsData] = await Promise.all([
+                unitService.getByProperty(propertyId),
+                tenantService.getByProperty(propertyId)
+            ]);
+            
+            units = unitsData;
+            tenants = tenantsData;
+
+            // Load access list if owner
+            if (canManageAccess) {
+                await loadAccessList();
+            }
         } catch (err) {
             console.error('Failed to load property:', err);
             error = err instanceof Error ? err.message : 'Failed to load property';
+        } finally {
             loading = false;
-            return;
         }
+    }
 
-        // Load units separately with error handling
+    async function loadAccessList() {
+        if (!property?.id) return;
         try {
-            console.log('Fetching units...');
-            units = await unitService.getByProperty(propertyId);
-            console.log('Units loaded:', units);
+            accessList = await userAccessService.getByProperty(property.id);
         } catch (err) {
-            console.error('Failed to load units:', err);
-            // Don't fail completely, just show empty units
-            units = [];
+            console.error('Failed to load access list:', err);
         }
+    }
 
-        // Load tenants separately with error handling
-        try {
-            console.log('Fetching tenants...');
-            tenants = await tenantService.getByProperty(propertyId);
-            console.log('Tenants loaded:', tenants);
-        } catch (err) {
-            console.error('Failed to load tenants:', err);
-            // Don't fail completely, just show empty tenants
-            tenants = [];
-        }
-
-        loading = false;
+    function handleAccessGranted() {
+        loadAccessList();
     }
 
     // Unit functions
@@ -240,55 +261,79 @@
 </script>
 
 <svelte:head>
-    <title>{property?.name ?? 'Property'} | Popati</title>
+    <title>{property?.name || 'Property'} | Popati</title>
 </svelte:head>
 
-{#if loading}
-    <div class="flex items-center justify-center py-12">
-        <svg class="h-8 w-8 animate-spin text-brand-500" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-        </svg>
-    </div>
-{:else if error && !property}
-    <div class="mx-auto max-w-2xl px-4 py-8">
+<div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+    {#if loading}
         <Card>
-            <p class="text-red-600">{error}</p>
-            <Button variant="secondary" onclick={loadData} class="mt-2">Retry</Button>
+            <div class="flex items-center justify-center py-8">
+                <svg class="h-8 w-8 animate-spin text-brand-500" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+            </div>
         </Card>
-    </div>
-{:else if property}
-    <div class="w-full px-4 py-8 sm:px-6 lg:px-8">
-        <!-- Changed: Added proper responsive max-width container -->
-        <div class="mx-auto w-full max-w-7xl space-y-6">
+    {:else if error}
+        <Card>
+            <div class="rounded bg-red-100 p-4 text-red-700">
+                <p>{error}</p>
+                <Button variant="secondary" onclick={loadData} class="mt-2">Retry</Button>
+            </div>
+        </Card>
+    {:else if property}
+        <div class="space-y-6">
             <!-- Header -->
-            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" onclick={() => goto('/properties')}>
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </Button>
+            <div class="flex items-start justify-between">
+                <div class="flex items-center gap-3">
+                    <!-- ...existing back button... -->
+                    <div>
                         <h1 class="text-2xl font-bold text-neutral-900">{property.name}</h1>
+                        <p class="text-neutral-500">{property.city}, {property.country}</p>
                     </div>
-                    <p class="mt-1 text-neutral-500">{property.city}, {property.country}</p>
                 </div>
                 <div class="flex gap-2">
-                    <Button variant="secondary" onclick={() => goto(`/properties/${property!.id}/edit`)}>Edit</Button>
-                    <Button variant="danger" onclick={() => confirmDelete('property', property!.id, property!.name)}>Delete</Button>
+                    {#if canEdit}
+                        <Button variant="secondary" onclick={() => goto(`/properties/${property?.id}/edit`)}>
+                            Edit Property
+                        </Button>
+                    {/if}
                 </div>
             </div>
 
-            {#if error}
-                <div class="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-600">{error}</div>
+            <!-- User Role Badge -->
+            {#if userRole && userRole !== 'owner'}
+                <Card>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-1 text-xs font-medium rounded-full {
+                            userRole === 'manager' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                        }">
+                            {userRole}
+                        </span>
+                        <span class="text-sm text-gray-600">
+                            {#if userRole === 'manager'}
+                                You can view and edit this property
+                            {:else}
+                                You have read-only access to this property
+                            {/if}
+                        </span>
+                    </div>
+                </Card>
             {/if}
 
             <!-- Units Section -->
             <Card>
-                <div class="mb-4 flex items-center justify-between">
+                <div class="flex items-center justify-between mb-4">
                     <h2 class="text-lg font-semibold text-neutral-900">Units</h2>
-                    <Button size="sm" onclick={() => openUnitModal()}>Add Unit</Button>
+                    {#if canEdit}
+                        <Button size="sm" onclick={() => { 
+                            editingUnit = null;
+                            unitForm = { unit_name: '', unit_number: '', property: property?.id ?? '' };
+                            unitModalOpen = true;
+                        }}>
+                            Add Unit
+                        </Button>
+                    {/if}
                 </div>
 
                 {#if units.length === 0}
@@ -321,9 +366,13 @@
 
             <!-- Tenants Section -->
             <Card>
-                <div class="mb-4 flex items-center justify-between">
+                <div class="flex items-center justify-between mb-4">
                     <h2 class="text-lg font-semibold text-neutral-900">Tenants</h2>
-                    <Button size="sm" onclick={() => openTenantModal()}>Add Tenant</Button>
+                    {#if canEdit}
+                        <Button size="sm" onclick={() => goto(`/tenants/new?property=${property?.id}`)}>
+                            Add Tenant
+                        </Button>
+                    {/if}
                 </div>
 
                 {#if tenants.length === 0}
@@ -366,68 +415,98 @@
                     </div>
                 {/if}
             </Card>
+
+            <!-- Shared Access Section (Owner Only) - Moved to bottom -->
+            {#if canManageAccess}
+                <Card>
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-neutral-900">Shared Access</h2>
+                        <Button onclick={() => grantAccessModalOpen = true}>
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            Grant Access
+                        </Button>
+                    </div>
+                    
+                    <AccessList 
+                        {accessList}
+                        canManage={true}
+                        onupdated={loadAccessList}
+                        onrevoked={loadAccessList}
+                    />
+                </Card>
+            {/if}
         </div>
-    </div>
 
-    <!-- Unit Modal -->
-    <Modal bind:open={unitModalOpen} title={editingUnit ? 'Edit Unit' : 'Add Unit'}>
-        <form onsubmit={(e) => { e.preventDefault(); saveUnit(); }} class="space-y-4">
-            <Input id="unit_number" label="Unit Number" bind:value={unitForm.unit_number} placeholder="e.g., A1" required />
-            <Input id="unit_name" label="Unit Name" bind:value={unitForm.unit_name} placeholder="e.g., Ground Floor Left (Optional)" />
-        </form>
+        <!-- Grant Access Modal -->
+        <GrantAccessModal
+            bind:open={grantAccessModalOpen}
+            propertyId={property.id}
+            propertyName={property.name}
+            ongranted={handleAccessGranted}
+        />
 
-        {#snippet footer()}
-            <Button variant="secondary" onclick={() => (unitModalOpen = false)}>Cancel</Button>
-            <Button loading={unitLoading} onclick={saveUnit}>{editingUnit ? 'Save' : 'Add'}</Button>
-        {/snippet}
-    </Modal>
+        <!-- Unit Modal -->
+        <Modal bind:open={unitModalOpen} title={editingUnit ? 'Edit Unit' : 'Add Unit'}>
+            <form onsubmit={(e) => { e.preventDefault(); saveUnit(); }} class="space-y-4">
+                <Input id="unit_number" label="Unit Number" bind:value={unitForm.unit_number} placeholder="e.g., A1" required />
+                <Input id="unit_name" label="Unit Name" bind:value={unitForm.unit_name} placeholder="e.g., Ground Floor Left (Optional)" />
+            </form>
 
-    <!-- Tenant Modal -->
-    <Modal bind:open={tenantModalOpen} title={editingTenant ? 'Edit Tenant' : 'Add Tenant'} size="lg">
-        <form onsubmit={(e) => { e.preventDefault(); saveTenant(); }} class="space-y-4">
-            <div class="grid gap-4 sm:grid-cols-2">
-                <Input id="first_name" label="First Name" bind:value={tenantForm.first_name} required />
-                <Input id="last_name" label="Last Name" bind:value={tenantForm.last_name} required />
-            </div>
-            <div class="grid gap-4 sm:grid-cols-2">
-                <Input id="preferred_name" label="Preferred Name" bind:value={tenantForm.preferred_name} placeholder="Optional" />
-                <Input id="id_card_number" label="ID Card Number" bind:value={tenantForm.id_card_number} placeholder="Optional" />
-            </div>
-            <div class="grid gap-4 sm:grid-cols-2">
-                <Input id="phone" label="Phone" type="tel" bind:value={tenantForm.phone} required />
-                <div class="space-y-1.5">
-                    <label for="unit" class="block text-sm font-medium text-neutral-700">Unit</label>
-                    <select
-                        id="unit"
-                        bind:value={tenantForm.unit}
-                        class="block w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
-                    >
-                        <option value="">No unit assigned</option>
-                        {#each units as unit}
-                            <option value={unit.id}>
-                                {unit.unit_name ? `${unit.unit_number} - ${unit.unit_name}` : unit.unit_number}
-                            </option>
-                        {/each}
-                    </select>
+            {#snippet footer()}
+                <Button variant="secondary" onclick={() => (unitModalOpen = false)}>Cancel</Button>
+                <Button loading={unitLoading} onclick={saveUnit}>{editingUnit ? 'Save' : 'Add'}</Button>
+            {/snippet}
+        </Modal>
+
+        <!-- Tenant Modal -->
+        <Modal bind:open={tenantModalOpen} title={editingTenant ? 'Edit Tenant' : 'Add Tenant'} size="lg">
+            <form onsubmit={(e) => { e.preventDefault(); saveTenant(); }} class="space-y-4">
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <Input id="first_name" label="First Name" bind:value={tenantForm.first_name} required />
+                    <Input id="last_name" label="Last Name" bind:value={tenantForm.last_name} required />
                 </div>
-            </div>
-            <label class="flex items-center gap-2">
-                <input type="checkbox" bind:checked={tenantForm.active} class="h-4 w-4 rounded border-neutral-300 bg-white text-brand-500 focus:ring-brand-500" />
-                <span class="text-sm text-neutral-700">Active tenant</span>
-            </label>
-        </form>
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <Input id="preferred_name" label="Preferred Name" bind:value={tenantForm.preferred_name} placeholder="Optional" />
+                    <Input id="id_card_number" label="ID Card Number" bind:value={tenantForm.id_card_number} placeholder="Optional" />
+                </div>
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <Input id="phone" label="Phone" type="tel" bind:value={tenantForm.phone} required />
+                    <div class="space-y-1.5">
+                        <label for="unit" class="block text-sm font-medium text-neutral-700">Unit</label>
+                        <select
+                            id="unit"
+                            bind:value={tenantForm.unit}
+                            class="block w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                        >
+                            <option value="">No unit assigned</option>
+                            {#each units as unit}
+                                <option value={unit.id}>
+                                    {unit.unit_name ? `${unit.unit_number} - ${unit.unit_name}` : unit.unit_number}
+                                </option>
+                            {/each}
+                        </select>
+                    </div>
+                </div>
+                <label class="flex items-center gap-2">
+                    <input type="checkbox" bind:checked={tenantForm.active} class="h-4 w-4 rounded border-neutral-300 bg-white text-brand-500 focus:ring-brand-500" />
+                    <span class="text-sm text-neutral-700">Active tenant</span>
+                </label>
+            </form>
 
-        {#snippet footer()}
-            <Button variant="secondary" onclick={() => (tenantModalOpen = false)}>Cancel</Button>
-            <Button loading={tenantLoading} onclick={saveTenant}>{editingTenant ? 'Save' : 'Add'}</Button>
-        {/snippet}
-    </Modal>
+            {#snippet footer()}
+                <Button variant="secondary" onclick={() => (tenantModalOpen = false)}>Cancel</Button>
+                <Button loading={tenantLoading} onclick={saveTenant}>{editingTenant ? 'Save' : 'Add'}</Button>
+            {/snippet}
+        </Modal>
 
-    <!-- Delete Confirmation -->
-    <ConfirmDialog
-        bind:open={deleteDialogOpen}
-        title="Delete {deleteTarget?.type}"
-        message="Are you sure you want to delete {deleteTarget?.name}? This action cannot be undone."
-        onconfirm={handleDelete}
-    />
-{/if}
+        <!-- Delete Confirmation -->
+        <ConfirmDialog
+            bind:open={deleteDialogOpen}
+            title="Delete {deleteTarget?.type}"
+            message="Are you sure you want to delete {deleteTarget?.name}? This action cannot be undone."
+            onconfirm={handleDelete}
+        />
+    {/if}
+</div>

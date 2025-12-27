@@ -8,12 +8,12 @@ import { rent_entries, tenants, properties, user_access } from '../db/schema';
 import { eq, and } from 'drizzle-orm';
 import { CreateRentDto } from './dto/create-rent.dto';
 import { UpdateRentDto } from './dto/update-rent.dto';
+import { canAccessProperty, canEditProperty } from '../common/access.util';
 
 @Injectable()
 export class RentService {
   async findByProperty(propertyId: string, userId: string) {
-    // Check if user has access to the property
-    const canAccess = await this.checkPropertyAccess(propertyId, userId);
+    const canAccess = await canAccessProperty(propertyId, userId);
     if (!canAccess) {
       throw new ForbiddenException('Access denied');
     }
@@ -42,7 +42,6 @@ export class RentService {
   }
 
   async findByTenant(tenantId: string, userId: string) {
-    // Get tenant first to check property access
     const [tenant] = await db
       .select()
       .from(tenants)
@@ -53,8 +52,7 @@ export class RentService {
       throw new NotFoundException('Tenant not found');
     }
 
-    // Check if user has access to the property
-    const canAccess = await this.checkPropertyAccess(tenant.property, userId);
+    const canAccess = await canAccessProperty(tenant.property, userId);
     if (!canAccess) {
       throw new ForbiddenException('Access denied');
     }
@@ -77,7 +75,6 @@ export class RentService {
       throw new NotFoundException('Rent entry not found');
     }
 
-    // Get tenant to check property access
     const [tenant] = await db
       .select()
       .from(tenants)
@@ -88,8 +85,7 @@ export class RentService {
       throw new NotFoundException('Tenant not found');
     }
 
-    // Check if user has access to the property
-    const canAccess = await this.checkPropertyAccess(tenant.property, userId);
+    const canAccess = await canAccessProperty(tenant.property, userId);
     if (!canAccess) {
       throw new ForbiddenException('Access denied');
     }
@@ -98,7 +94,6 @@ export class RentService {
   }
 
   async create(data: CreateRentDto, userId: string) {
-    // Get tenant to check property access
     const [tenant] = await db
       .select()
       .from(tenants)
@@ -109,8 +104,7 @@ export class RentService {
       throw new NotFoundException('Tenant not found');
     }
 
-    // Check if user has edit access to the property
-    const canEdit = await this.checkPropertyEditAccess(tenant.property, userId);
+    const canEdit = await canEditProperty(tenant.property, userId);
     if (!canEdit) {
       throw new ForbiddenException('Access denied');
     }
@@ -131,7 +125,6 @@ export class RentService {
   }
 
   async update(id: string, data: UpdateRentDto, userId: string) {
-    // Get entry first
     const [entry] = await db
       .select()
       .from(rent_entries)
@@ -142,7 +135,6 @@ export class RentService {
       throw new NotFoundException('Rent entry not found');
     }
 
-    // Get tenant to check property access
     const [tenant] = await db
       .select()
       .from(tenants)
@@ -153,8 +145,7 @@ export class RentService {
       throw new NotFoundException('Tenant not found');
     }
 
-    // Check if user has edit access to the property
-    const canEdit = await this.checkPropertyEditAccess(tenant.property, userId);
+    const canEdit = await canEditProperty(tenant.property, userId);
     if (!canEdit) {
       throw new ForbiddenException('Access denied');
     }
@@ -175,7 +166,6 @@ export class RentService {
   }
 
   async remove(id: string, userId: string) {
-    // Get entry first
     const [entry] = await db
       .select()
       .from(rent_entries)
@@ -186,7 +176,6 @@ export class RentService {
       throw new NotFoundException('Rent entry not found');
     }
 
-    // Get tenant to check property access
     const [tenant] = await db
       .select()
       .from(tenants)
@@ -197,70 +186,12 @@ export class RentService {
       throw new NotFoundException('Tenant not found');
     }
 
-    // Check if user has edit access to the property
-    const canEdit = await this.checkPropertyEditAccess(tenant.property, userId);
+    const canEdit = await canEditProperty(tenant.property, userId);
     if (!canEdit) {
       throw new ForbiddenException('Access denied');
     }
 
     await db.delete(rent_entries).where(eq(rent_entries.id, id));
     return { success: true };
-  }
-
-  private async checkPropertyAccess(
-    propertyId: string,
-    userId: string,
-  ): Promise<boolean> {
-    // Check if user owns the property
-    const [property] = await db
-      .select()
-      .from(properties)
-      .where(and(eq(properties.id, propertyId), eq(properties.owner, userId)))
-      .limit(1);
-
-    if (property) return true;
-
-    // Check if user has access via user_access
-    const [access] = await db
-      .select()
-      .from(user_access)
-      .where(
-        and(
-          eq(user_access.property, propertyId),
-          eq(user_access.user, userId),
-        ),
-      )
-      .limit(1);
-
-    return !!access;
-  }
-
-  private async checkPropertyEditAccess(
-    propertyId: string,
-    userId: string,
-  ): Promise<boolean> {
-    // Check if user owns the property
-    const [property] = await db
-      .select()
-      .from(properties)
-      .where(and(eq(properties.id, propertyId), eq(properties.owner, userId)))
-      .limit(1);
-
-    if (property) return true;
-
-    // Check if user has manager access via user_access
-    const [access] = await db
-      .select()
-      .from(user_access)
-      .where(
-        and(
-          eq(user_access.property, propertyId),
-          eq(user_access.user, userId),
-          eq(user_access.role, 'manager'),
-        ),
-      )
-      .limit(1);
-
-    return !!access;
   }
 }

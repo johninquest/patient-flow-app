@@ -8,12 +8,12 @@ import { tenants, properties, user_access } from '../db/schema';
 import { eq, and } from 'drizzle-orm';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
+import { canAccessProperty, canEditProperty } from '../common/access.util';
 
 @Injectable()
 export class TenantService {
   async findByProperty(propertyId: string, userId: string) {
-    // Check if user has access to the property
-    const hasAccess = await this.checkPropertyAccess(propertyId, userId);
+    const hasAccess = await canAccessProperty(propertyId, userId);
     if (!hasAccess) {
       throw new ForbiddenException('Access denied');
     }
@@ -36,8 +36,7 @@ export class TenantService {
       throw new NotFoundException('Tenant not found');
     }
 
-    // Check access to property
-    const hasAccess = await this.checkPropertyAccess(tenant.property, userId);
+    const hasAccess = await canAccessProperty(tenant.property, userId);
     if (!hasAccess) {
       throw new ForbiddenException('Access denied');
     }
@@ -46,8 +45,7 @@ export class TenantService {
   }
 
   async create(data: CreateTenantDto, userId: string) {
-    // Check if user has edit access to the property
-    const canEdit = await this.checkPropertyEditAccess(data.property, userId);
+    const canEdit = await canEditProperty(data.property, userId);
     if (!canEdit) {
       throw new ForbiddenException('Access denied');
     }
@@ -70,7 +68,6 @@ export class TenantService {
   }
 
   async update(id: string, data: UpdateTenantDto, userId: string) {
-    // Get tenant first
     const [tenant] = await db
       .select()
       .from(tenants)
@@ -81,8 +78,7 @@ export class TenantService {
       throw new NotFoundException('Tenant not found');
     }
 
-    // Check if user has edit access to the property
-    const canEdit = await this.checkPropertyEditAccess(tenant.property, userId);
+    const canEdit = await canEditProperty(tenant.property, userId);
     if (!canEdit) {
       throw new ForbiddenException('Access denied');
     }
@@ -109,7 +105,6 @@ export class TenantService {
   }
 
   async remove(id: string, userId: string) {
-    // Get tenant first
     const [tenant] = await db
       .select()
       .from(tenants)
@@ -120,70 +115,12 @@ export class TenantService {
       throw new NotFoundException('Tenant not found');
     }
 
-    // Check if user has edit access to the property
-    const canEdit = await this.checkPropertyEditAccess(tenant.property, userId);
+    const canEdit = await canEditProperty(tenant.property, userId);
     if (!canEdit) {
       throw new ForbiddenException('Access denied');
     }
 
     await db.delete(tenants).where(eq(tenants.id, id));
     return { success: true };
-  }
-
-  private async checkPropertyAccess(
-    propertyId: string,
-    userId: string,
-  ): Promise<boolean> {
-    // Check if user owns the property
-    const [property] = await db
-      .select()
-      .from(properties)
-      .where(and(eq(properties.id, propertyId), eq(properties.owner, userId)))
-      .limit(1);
-
-    if (property) return true;
-
-    // Check if user has shared access
-    const [access] = await db
-      .select()
-      .from(user_access)
-      .where(
-        and(
-          eq(user_access.property, propertyId),
-          eq(user_access.user, userId),
-        ),
-      )
-      .limit(1);
-
-    return !!access;
-  }
-
-  private async checkPropertyEditAccess(
-    propertyId: string,
-    userId: string,
-  ): Promise<boolean> {
-    // Check if user owns the property
-    const [property] = await db
-      .select()
-      .from(properties)
-      .where(and(eq(properties.id, propertyId), eq(properties.owner, userId)))
-      .limit(1);
-
-    if (property) return true;
-
-    // Check if user has manager access
-    const [access] = await db
-      .select()
-      .from(user_access)
-      .where(
-        and(
-          eq(user_access.property, propertyId),
-          eq(user_access.user, userId),
-          eq(user_access.role, 'manager'),
-        ),
-      )
-      .limit(1);
-
-    return !!access;
   }
 }

@@ -7,12 +7,12 @@ import {
 import { db } from '../db';
 import { user_access, properties, user } from '../db/schema';
 import { eq, and } from 'drizzle-orm';
+import { isPropertyOwner } from '../common/access.util';
 
 @Injectable()
 export class UserAccessService {
   async findByProperty(propertyId: string, userId: string) {
-    // Check if user owns the property
-    const isOwner = await this.isPropertyOwner(propertyId, userId);
+    const isOwner = await isPropertyOwner(propertyId, userId);
     if (!isOwner) {
       throw new ForbiddenException('Only property owners can view access list');
     }
@@ -93,8 +93,7 @@ export class UserAccessService {
     data: { user: string; property: string; role: string },
     grantedBy: string,
   ) {
-    // Check if granter owns the property
-    const isOwner = await this.isPropertyOwner(data.property, grantedBy);
+    const isOwner = await isPropertyOwner(data.property, grantedBy);
     if (!isOwner) {
       throw new ForbiddenException('Only property owners can grant access');
     }
@@ -129,7 +128,6 @@ export class UserAccessService {
   }
 
   async updateAccess(id: string, data: { role: string }, userId: string) {
-    // Get access record
     const [access] = await db
       .select()
       .from(user_access)
@@ -140,8 +138,7 @@ export class UserAccessService {
       throw new NotFoundException('Access record not found');
     }
 
-    // Check if user owns the property
-    const isOwner = await this.isPropertyOwner(access.property, userId);
+    const isOwner = await isPropertyOwner(access.property, userId);
     if (!isOwner) {
       throw new ForbiddenException('Only property owners can update access');
     }
@@ -156,7 +153,6 @@ export class UserAccessService {
   }
 
   async revokeAccess(id: string, userId: string) {
-    // Get access record
     const [access] = await db
       .select()
       .from(user_access)
@@ -167,27 +163,13 @@ export class UserAccessService {
       throw new NotFoundException('Access record not found');
     }
 
-    // Check if user owns the property
-    const isOwner = await this.isPropertyOwner(access.property, userId);
+    const isOwner = await isPropertyOwner(access.property, userId);
     if (!isOwner) {
       throw new ForbiddenException('Only property owners can revoke access');
     }
 
     await db.delete(user_access).where(eq(user_access.id, id));
     return { success: true };
-  }
-
-  private async isPropertyOwner(
-    propertyId: string,
-    userId: string,
-  ): Promise<boolean> {
-    const [property] = await db
-      .select()
-      .from(properties)
-      .where(and(eq(properties.id, propertyId), eq(properties.owner, userId)))
-      .limit(1);
-
-    return !!property;
   }
 }
 

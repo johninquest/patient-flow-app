@@ -8,12 +8,12 @@ import { expenses, properties, user_access } from '../db/schema';
 import { eq, and } from 'drizzle-orm';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
+import { canAccessProperty, canEditProperty } from '../common/access.util';
 
 @Injectable()
 export class ExpensesService {
   async findByProperty(propertyId: string, userId: string) {
-    // Check if user has access to the property
-    const canAccess = await this.checkPropertyAccess(propertyId, userId);
+    const canAccess = await canAccessProperty(propertyId, userId);
     if (!canAccess) {
       throw new ForbiddenException('Access denied');
     }
@@ -36,8 +36,7 @@ export class ExpensesService {
       throw new NotFoundException('Expense not found');
     }
 
-    // Check if user has access to the property
-    const canAccess = await this.checkPropertyAccess(expense.property, userId);
+    const canAccess = await canAccessProperty(expense.property, userId);
     if (!canAccess) {
       throw new ForbiddenException('Access denied');
     }
@@ -46,8 +45,7 @@ export class ExpensesService {
   }
 
   async create(data: CreateExpenseDto, userId: string) {
-    // Check if user has edit access to the property
-    const canEdit = await this.checkPropertyEditAccess(data.property, userId);
+    const canEdit = await canEditProperty(data.property, userId);
     if (!canEdit) {
       throw new ForbiddenException('Access denied');
     }
@@ -70,7 +68,6 @@ export class ExpensesService {
   }
 
   async update(id: string, data: UpdateExpenseDto, userId: string) {
-    // Get expense first
     const [expense] = await db
       .select()
       .from(expenses)
@@ -81,8 +78,7 @@ export class ExpensesService {
       throw new NotFoundException('Expense not found');
     }
 
-    // Check if user has edit access to the property
-    const canEdit = await this.checkPropertyEditAccess(expense.property, userId);
+    const canEdit = await canEditProperty(expense.property, userId);
     if (!canEdit) {
       throw new ForbiddenException('Access denied');
     }
@@ -105,7 +101,6 @@ export class ExpensesService {
   }
 
   async remove(id: string, userId: string) {
-    // Get expense first
     const [expense] = await db
       .select()
       .from(expenses)
@@ -116,70 +111,12 @@ export class ExpensesService {
       throw new NotFoundException('Expense not found');
     }
 
-    // Check if user has edit access to the property
-    const canEdit = await this.checkPropertyEditAccess(expense.property, userId);
+    const canEdit = await canEditProperty(expense.property, userId);
     if (!canEdit) {
       throw new ForbiddenException('Access denied');
     }
 
     await db.delete(expenses).where(eq(expenses.id, id));
     return { success: true };
-  }
-
-  private async checkPropertyAccess(
-    propertyId: string,
-    userId: string,
-  ): Promise<boolean> {
-    // Check if user owns the property
-    const [property] = await db
-      .select()
-      .from(properties)
-      .where(and(eq(properties.id, propertyId), eq(properties.owner, userId)))
-      .limit(1);
-
-    if (property) return true;
-
-    // Check if user has access via user_access
-    const [access] = await db
-      .select()
-      .from(user_access)
-      .where(
-        and(
-          eq(user_access.property, propertyId),
-          eq(user_access.user, userId),
-        ),
-      )
-      .limit(1);
-
-    return !!access;
-  }
-
-  private async checkPropertyEditAccess(
-    propertyId: string,
-    userId: string,
-  ): Promise<boolean> {
-    // Check if user owns the property
-    const [property] = await db
-      .select()
-      .from(properties)
-      .where(and(eq(properties.id, propertyId), eq(properties.owner, userId)))
-      .limit(1);
-
-    if (property) return true;
-
-    // Check if user has manager access via user_access
-    const [access] = await db
-      .select()
-      .from(user_access)
-      .where(
-        and(
-          eq(user_access.property, propertyId),
-          eq(user_access.user, userId),
-          eq(user_access.role, 'manager'),
-        ),
-      )
-      .limit(1);
-
-    return !!access;
   }
 }

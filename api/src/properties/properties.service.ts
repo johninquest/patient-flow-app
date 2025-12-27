@@ -4,10 +4,11 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { db } from '../db';
-import { properties, user_access } from '../db/schema'; // Changed from userAccess
+import { properties, user_access } from '../db/schema';
 import { eq, and } from 'drizzle-orm';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
+import { canAccessProperty, canEditProperty, isPropertyOwner } from '../common/access.util';
 
 @Injectable()
 export class PropertiesService {
@@ -52,8 +53,7 @@ export class PropertiesService {
       throw new NotFoundException('Property not found');
     }
 
-    // Check access
-    const hasAccess = await this.checkAccess(id, userId);
+    const hasAccess = await canAccessProperty(id, userId);
     if (!hasAccess) {
       throw new ForbiddenException('Access denied');
     }
@@ -76,8 +76,7 @@ export class PropertiesService {
   }
 
   async update(id: string, data: UpdatePropertyDto, userId: string) {
-    // Check if user is owner or manager
-    const canEdit = await this.checkEditAccess(id, userId);
+    const canEdit = await canEditProperty(id, userId);
     if (!canEdit) {
       throw new ForbiddenException('Access denied');
     }
@@ -90,7 +89,7 @@ export class PropertiesService {
     if (data.city !== undefined) updateData.city = data.city;
     if (data.country !== undefined) updateData.country = data.country;
     if (data.construction_year !== undefined)
-      updateData.construction_year = data.construction_year; // Changed from constructionYear
+      updateData.construction_year = data.construction_year;
 
     const [property] = await db
       .update(properties)
@@ -106,71 +105,12 @@ export class PropertiesService {
   }
 
   async remove(id: string, userId: string) {
-    // Only owner can delete
-    const [property] = await db
-      .select()
-      .from(properties)
-      .where(and(eq(properties.id, id), eq(properties.owner, userId)))
-      .limit(1);
-
-    if (!property) {
+    const isOwner = await isPropertyOwner(id, userId);
+    if (!isOwner) {
       throw new ForbiddenException('Only owner can delete property');
     }
 
     await db.delete(properties).where(eq(properties.id, id));
     return { success: true };
-  }
-
-  private async checkAccess(
-    propertyId: string,
-    userId: string,
-  ): Promise<boolean> {
-    const [property] = await db
-      .select()
-      .from(properties)
-      .where(and(eq(properties.id, propertyId), eq(properties.owner, userId)))
-      .limit(1);
-
-    if (property) return true;
-
-    const [access] = await db
-      .select()
-      .from(user_access) // Changed from userAccess
-      .where(
-        and(
-          eq(user_access.property, propertyId),
-          eq(user_access.user, userId),
-        ),
-      )
-      .limit(1);
-
-    return !!access;
-  }
-
-  private async checkEditAccess(
-    propertyId: string,
-    userId: string,
-  ): Promise<boolean> {
-    const [property] = await db
-      .select()
-      .from(properties)
-      .where(and(eq(properties.id, propertyId), eq(properties.owner, userId)))
-      .limit(1);
-
-    if (property) return true;
-
-    const [access] = await db
-      .select()
-      .from(user_access) // Changed from userAccess
-      .where(
-        and(
-          eq(user_access.property, propertyId),
-          eq(user_access.user, userId),
-          eq(user_access.role, 'manager'),
-        ),
-      )
-      .limit(1);
-
-    return !!access;
   }
 }
