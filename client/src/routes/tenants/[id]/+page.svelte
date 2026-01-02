@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
-    import { page } from '$app/stores';
+    import { page } from '$app/state';
     import { Button, Card, Input, Select, ConfirmDialog } from '$lib/components';
     import Tooltip from '$lib/components/Tooltip.svelte';
     import { tenantService, unitService, rentService } from '$lib/services';
@@ -36,7 +36,7 @@
     async function loadData() {
         loading = true;
         error = null;
-        const tenantId = $page.params.id;
+        const tenantId = page.params.id;
 
         if (!tenantId) {
             error = 'Tenant ID is required';
@@ -75,10 +75,7 @@
         error = null;
 
         try {
-            await tenantService.update(tenant.id, {
-                ...formData,
-                property: tenant.property
-            });
+            await tenantService.update(tenant.id, formData);
             tenant = await tenantService.getById(tenant.id);
             isEditing = false;
         } catch (err) {

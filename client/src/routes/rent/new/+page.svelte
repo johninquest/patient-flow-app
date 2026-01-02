@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onMount } from 'svelte';
+    import { page } from '$app/state'; // Changed from '$app/stores'
     import { goto } from '$app/navigation';
     import { Button, Card, Input, Select } from '$lib/components';
     import Tooltip from '$lib/components/Tooltip.svelte';
@@ -28,6 +29,8 @@
     let fieldErrors = $state<Record<string, string>>({});
 
     let selectedPropertyId = $state<string>('');
+    let preSelectedPropertyId = $state<string>('');
+    let propertyLocked = $state(false);
     
     // Separate month and year selections
     const currentDate = new Date();
@@ -82,13 +85,18 @@
     }
 
     onMount(async () => {
-        try {
-            properties = await propertyService.getAll();
-        } catch (err) {
-            error = err instanceof Error ? err.message : 'Failed to load data';
-        } finally {
-            loading = false;
+        // Check if property is pre-selected from URL
+        const propertyParam = page.url.searchParams.get('property');
+        if (propertyParam) {
+            preSelectedPropertyId = propertyParam;
+            selectedPropertyId = propertyParam;
+            propertyLocked = true;
+            await loadTenants();
         }
+        
+        // Load properties
+        properties = await propertyService.getAll();
+        loading = false;
     });
 
     async function loadTenants() {
@@ -140,7 +148,13 @@
 
         try {
             await rentService.create(formData);
-            goto('/rent');
+            
+            // Redirect back to property page if property was pre-selected
+            if (propertyLocked && preSelectedPropertyId) {
+                goto(`/properties/${preSelectedPropertyId}?tab=rents`);
+            } else {
+                goto('/rent');
+            }
         } catch (err) {
             error = err instanceof Error ? err.message : 'Failed to record payment';
         } finally {
@@ -222,7 +236,7 @@
                             ...properties.map((p) => ({ value: p.id, label: p.name }))
                         ]}
                         onchange={handlePropertyChange}
-                        error={fieldErrors.property}
+                        disabled={propertyLocked}
                         required
                     />
 

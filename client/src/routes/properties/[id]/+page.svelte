@@ -1,7 +1,8 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
-    import { page } from '$app/stores';
+    import { page } from '$app/state';
+    import { currentUser } from '$lib/auth'; // ✅ Add this import
     import { 
         Card, 
         Button, 
@@ -20,9 +21,11 @@
         unitService, 
         tenantService, 
         userAccessService,
-        activityService 
+        activityService,
+        expenseService,
+        rentService 
     } from '$lib/services';
-    import type { Property, Unit, Tenant, UserAccess, Activity, ActivityFilters, ActivityAction } from '$lib/types';
+    import type { Property, Unit, Tenant, UserAccess, Activity, ActivityFilters, ActivityAction, Expense, RentEntry } from '$lib/types';
 
     interface TenantFormData {
         first_name: string;
@@ -76,18 +79,33 @@
 
     // Delete confirmation
     let deleteDialogOpen = $state(false);
-    let deleteTarget = $state<{ type: 'property' | 'unit' | 'tenant'; id: string; name: string } | null>(null);
+    let deleteTarget = $state<{ type: 'property' | 'unit' | 'tenant' | 'rent' | 'expense'; id: string; name: string } | null>(null);
 
     // Access management
     let grantAccessModalOpen = $state(false);
 
     // Activity state
-    let activeTab = $state<'overview' | 'activity'>('overview');
+    let activeTab = $state<'overview' | 'activity' | 'expenses' | 'rents'>('overview');
     let activities = $state<Activity[]>([]);
     let activityLoading = $state(false);
     let activityFilters = $state<ActivityFilters>({
         days: 30
     });
+
+    // Add state for expenses and rents
+    let expenses = $state<Expense[]>([]);
+    let rentEntries = $state<RentEntry[]>([]);
+
+    // Rent modal
+    let rentModalOpen = $state(false);
+    let editingRent = $state<RentEntry | null>(null);
+    let rentForm = $state<{ amount: number; date: string; tenant: string; property: string }>({
+        amount: 0,
+        date: '',
+        tenant: '',
+        property: ''
+    });
+    let rentLoading = $state(false);
 
     const unitColumns = [
         { key: 'unit_number', label: 'Unit #' },
@@ -103,14 +121,44 @@
         { key: 'actions', label: '', class: 'w-24' }
     ];
 
+    const expenseColumns = [
+        { key: 'date', label: 'Date' },
+        { key: 'category', label: 'Category' },
+        { key: 'amount', label: 'Amount' },
+        { key: 'actions', label: '', class: 'w-24' }
+    ]; // ✅ Removed description column
+
+    const rentColumns = [
+        { key: 'date', label: 'Date' },
+        { key: 'tenant', label: 'Tenant' },
+        { key: 'amount', label: 'Amount' },
+        { key: 'actions', label: '', class: 'w-24' } // Always include this
+    ];
+
+    const expenseCategories = [
+        { value: 'maintenance', label: 'Maintenance' },
+        { value: 'repairs', label: 'Repairs' },
+        { value: 'utilities', label: 'Utilities' },
+        { value: 'insurance', label: 'Insurance' },
+        { value: 'taxes', label: 'Taxes' },
+        { value: 'management', label: 'Management' },
+        { value: 'other', label: 'Other' }
+    ];
+
     onMount(async () => {
+        // Read tab from URL
+        const tabParam = page.url.searchParams.get('tab');
+        if (tabParam && ['overview', 'activity', 'expenses', 'rents'].includes(tabParam)) {
+            activeTab = tabParam as typeof activeTab;
+        }
+        
         await loadData();
     });
 
     async function loadData() {
         loading = true;
         error = null;
-        const propertyId = $page.params.id;
+        const propertyId = page.params.id;
 
         if (!propertyId) {
             error = 'Property ID is required';
@@ -119,23 +167,39 @@
         }
 
         try {
-            property = await propertyService.getById(propertyId);
-            
-            // Check user's role for this property
-            userRole = await userAccessService.getUserRole(propertyId);
-
-            // Load units and tenants
-            const [unitsData, tenantsData] = await Promise.all([
+            const [
+                propertyData,
+                unitsData,
+                tenantsData,
+                accessesData,
+                expensesData,
+                rentEntriesData
+            ] = await Promise.all([
+                propertyService.getById(propertyId),
                 unitService.getByProperty(propertyId),
-                tenantService.getByProperty(propertyId)
+                tenantService.getByProperty(propertyId),
+                userAccessService.getByProperty(propertyId),
+                expenseService.getByProperty(propertyId),
+                rentService.getByProperty(propertyId)
             ]);
-            
+
+            property = propertyData;
             units = unitsData;
             tenants = tenantsData;
+            accessList = accessesData;
+            expenses = expensesData;
+            rentEntries = rentEntriesData;
 
-            // Load access list if owner
-            if (canManageAccess) {
-                await loadAccessList();
+            // ✅ Get the actual authenticated user
+            const user = $currentUser;
+            const userId = user?.id;
+
+            // Determine user role
+            if (property && property.owner === userId) {
+                userRole = 'owner';
+            } else {
+                const userAccess = accessList.find((a: UserAccess) => a.user === userId);
+                userRole = userAccess?.role as 'owner' | 'manager' | 'viewer' | null;
             }
         } catch (err) {
             console.error('Failed to load property:', err);
@@ -163,12 +227,12 @@
         editingUnit = unit ?? null;
         unitForm = unit
             ? { unit_name: unit.unit_name ?? '', unit_number: unit.unit_number, property: unit.property }
-            : { unit_name: '', unit_number: '', property: $page.params.id ?? '' };
+            : { unit_name: '', unit_number: '', property: page.params.id ?? '' };
         unitModalOpen = true;
     }
 
     async function saveUnit() {
-        const propertyId = $page.params.id;
+        const propertyId = page.params.id;
         if (!propertyId) return;
         
         unitLoading = true;
@@ -216,7 +280,7 @@
                 preferred_name: '',
                 id_card_number: '',
                 phone: '',
-                property: $page.params.id ?? '',
+                property: page.params.id ?? '',
                 unit: '',
                 active: true
             };
@@ -224,7 +288,7 @@
     }
 
     async function saveTenant() {
-        const propertyId = $page.params.id;
+        const propertyId = page.params.id;
         if (!propertyId) return;
         
         tenantLoading = true;
@@ -257,14 +321,14 @@
     }
 
     // Delete functions
-    function confirmDelete(type: 'property' | 'unit' | 'tenant', id: string, name: string) {
+    function confirmDelete(type: 'property' | 'unit' | 'tenant' | 'rent' | 'expense', id: string, name: string) {
         deleteTarget = { type, id, name };
         deleteDialogOpen = true;
     }
 
     async function handleDelete() {
         if (!deleteTarget) return;
-        const propertyId = $page.params.id;
+        const propertyId = page.params.id;
         if (!propertyId) return;
 
         try {
@@ -277,6 +341,12 @@
             } else if (deleteTarget.type === 'tenant') {
                 await tenantService.delete(deleteTarget.id);
                 tenants = await tenantService.getByProperty(propertyId);
+            } else if (deleteTarget.type === 'rent') {
+                await rentService.delete(deleteTarget.id);
+                rentEntries = await rentService.getByProperty(propertyId);
+            } else if (deleteTarget.type === 'expense') {
+                await expenseService.delete(deleteTarget.id);
+                expenses = await expenseService.getByProperty(propertyId);
             }
         } catch (err) {
             error = err instanceof Error ? err.message : 'Failed to delete';
@@ -289,6 +359,32 @@
         const unit = units.find((u) => u.id === unitId);
         if (!unit) return '—';
         return unit.unit_name ? `${unit.unit_number} - ${unit.unit_name}` : unit.unit_number;
+    }
+
+    // Rent functions
+    function openRentModal(rent?: RentEntry) {
+        editingRent = rent ?? null;
+        rentForm = rent
+            ? {
+                amount: rent.amount,
+                date: rent.payment_date,
+                tenant: typeof rent.tenant === 'string' ? rent.tenant : (rent.tenant as any)?.id ?? '',
+                property: property?.id ?? ''
+            }
+            : {
+                amount: 0,
+                date: new Date().toISOString().split('T')[0],
+                tenant: '',
+                property: page.params.id ?? ''
+            };
+        rentModalOpen = true;
+    }
+
+    function formatCurrency(amount: number): string {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD'
+        }).format(amount);
     }
 
     async function loadActivityFeed() {
@@ -320,6 +416,34 @@
             loadActivityFeed();
         }
     });
+
+    // Add an effect to reload expenses when tab changes
+    $effect(() => {
+        if (activeTab === 'expenses' && property) {
+            loadExpenses();
+        }
+        if (activeTab === 'rents' && property) {
+            loadRentEntries();
+        }
+    });
+
+    async function loadExpenses() {
+        if (!property) return;
+        try {
+            expenses = await expenseService.getByProperty(property.id);
+        } catch (err) {
+            console.error('Failed to load expenses:', err);
+        }
+    }
+
+    async function loadRentEntries() {
+        if (!property) return;
+        try {
+            rentEntries = await rentService.getByProperty(property.id);
+        } catch (err) {
+            console.error('Failed to load rent entries:', err);
+        }
+    }
 </script>
 
 <svelte:head>
@@ -392,19 +516,19 @@
             </div>
 
             <!-- Tab Navigation -->
-            <div class="border-b border-gray-200">
-                <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-                    <button
-                        onclick={() => activeTab = 'overview'}
-                        class="whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors {activeTab === 'overview' ? 'border-brand-500 text-brand-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}"
-                    >
+            <div class="border-b border-neutral-200">
+                <nav class="flex gap-4">
+                    <button onclick={() => activeTab = 'overview'} class={activeTab === 'overview' ? 'border-b-2 border-brand-500' : ''}>
                         Overview
                     </button>
-                    <button
-                        onclick={() => activeTab = 'activity'}
-                        class="whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors {activeTab === 'activity' ? 'border-brand-500 text-brand-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}"
-                    >
+                    <button onclick={() => activeTab = 'activity'} class={activeTab === 'activity' ? 'border-b-2 border-brand-500' : ''}>
                         Activity
+                    </button>
+                    <button onclick={() => activeTab = 'expenses'} class={activeTab === 'expenses' ? 'border-b-2 border-brand-500' : ''}>
+                        Expenses
+                    </button>
+                    <button onclick={() => activeTab = 'rents'} class={activeTab === 'rents' ? 'border-b-2 border-brand-500' : ''}>
+                        Rents
                     </button>
                 </nav>
             </div>
@@ -454,18 +578,15 @@
                         </EmptyState>
                     {:else}
                         <div class="overflow-x-auto">
+                            <!-- Units Table -->
                             <Table columns={unitColumns}>
                                 {#each units as unit}
-                                    <tr class="hover:bg-neutral-50">
+                                    <tr class="hover:bg-neutral-50 cursor-pointer" onclick={() => goto(`/units/${unit.id}`)}>
                                         <td class="px-4 py-3 text-sm font-medium text-neutral-900">{unit.unit_number}</td>
                                         <td class="px-4 py-3 text-sm text-neutral-600">{unit.unit_name ?? '—'}</td>
-                                        <td class="px-4 py-3 text-right">
+                                        <td class="px-4 py-3 text-right" onclick={(e) => e.stopPropagation()}>
                                             <div class="flex justify-end gap-1">
                                                 <Button variant="ghost" size="sm" onclick={() => goto(`/units/${unit.id}`)}>View</Button>
-                                                {#if canEdit}
-                                                    <Button variant="ghost" size="sm" onclick={() => openUnitModal(unit)}>Edit</Button>
-                                                    <Button variant="ghost" size="sm" onclick={() => confirmDelete('unit', unit.id, unit.unit_number)}>Delete</Button>
-                                                {/if}
                                             </div>
                                         </td>
                                     </tr>
@@ -496,9 +617,10 @@
                         </EmptyState>
                     {:else}
                         <div class="overflow-x-auto">
+                            <!-- Tenants Table -->
                             <Table columns={tenantColumns}>
                                 {#each tenants as tenant}
-                                    <tr class="hover:bg-neutral-50">
+                                    <tr class="hover:bg-neutral-50 cursor-pointer" onclick={() => goto(`/tenants/${tenant.id}`)}>
                                         <td class="px-4 py-3 text-sm font-medium text-neutral-900">
                                             <div class="min-w-37.5">
                                                 {tenant.first_name} {tenant.last_name}
@@ -514,13 +636,9 @@
                                                 {tenant.active ? 'Active' : 'Inactive'}
                                             </span>
                                         </td>
-                                        <td class="px-4 py-3 text-right">
+                                        <td class="px-4 py-3 text-right" onclick={(e) => e.stopPropagation()}>
                                             <div class="flex justify-end gap-1">
                                                 <Button variant="ghost" size="sm" onclick={() => goto(`/tenants/${tenant.id}`)}>View</Button>
-                                                {#if canEdit}
-                                                    <Button variant="ghost" size="sm" onclick={() => openTenantModal(tenant)}>Edit</Button>
-                                                    <Button variant="ghost" size="sm" onclick={() => confirmDelete('tenant', tenant.id, `${tenant.first_name} ${tenant.last_name}`)}>Delete</Button>
-                                                {/if}
                                             </div>
                                         </td>
                                     </tr>
@@ -586,6 +704,120 @@
 
                     <ActivityFeed {activities} loading={activityLoading} />
                 </Card>
+            {:else if activeTab === 'expenses'}
+                <!-- Expenses Section -->
+                <Card>
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-semibold">Expenses</h2>
+                    </div>
+                    
+                    {#if expenses.length === 0}
+                        <EmptyState title="No expenses" description="Record your first expense">
+                            {#snippet action()}
+                                {#if canEdit}
+                                    <Button onclick={() => property && goto(`/expenses/new?property=${property.id}`)}>
+                                        Add Expense
+                                    </Button>
+                                {/if}
+                            {/snippet}
+                        </EmptyState>
+                    {:else}
+                        <Table columns={expenseColumns}>
+                            {#each expenses as expense}
+                                <tr class="hover:bg-neutral-50 cursor-pointer" onclick={() => goto(`/expenses/${expense.id}`)}>
+                                    <td class="px-4 py-3 text-sm text-neutral-900">
+                                        {new Date(expense.expense_date).toLocaleDateString()}
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-neutral-600">
+                                        <span class="px-2 py-1 text-xs rounded-full bg-neutral-100 text-neutral-700">
+                                            {expenseCategories.find(c => c.value === expense.category)?.label ?? expense.category}
+                                        </span>
+                                    </td>
+                                    <!-- ✅ REMOVED description cell here -->
+                                    <td class="px-4 py-3 text-sm text-red-600 font-medium">
+                                        {formatCurrency(expense.amount)}
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-right" onclick={(e) => e.stopPropagation()}>
+                                        <Button variant="ghost" size="sm" onclick={() => goto(`/expenses/${expense.id}`)}>
+                                            View
+                                        </Button>
+                                    </td>
+                                </tr>
+                            {/each}
+                        </Table>
+                    {/if}
+                </Card>
+
+                <!-- Floating Action Button for Expenses -->
+                {#if canEdit}
+                    <button
+                        onclick={() => property && goto(`/expenses/new?property=${property.id}`)}
+                        class="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-brand-600 text-white shadow-lg hover:bg-brand-700 focus:outline-none focus:ring-4 focus:ring-brand-300 transition-all hover:scale-105 z-50"
+                        aria-label="Add Expense"
+                    >
+                        <svg class="h-6 w-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                    </button>
+                {/if}
+
+            {:else if activeTab === 'rents'}
+                <!-- Rent Entries Section -->
+                <Card>
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-neutral-900">Rent Entries</h2>
+                    </div>
+
+                    {#if rentEntries.length === 0}
+                        <EmptyState title="No rent entries" description="Record your first rent payment">
+                            {#snippet action()}
+                                {#if canEdit}
+                                    <Button onclick={() => property && goto(`/rent/new?property=${property.id}`)}>
+                                        Record Payment
+                                    </Button>
+                                {/if}
+                            {/snippet}
+                        </EmptyState>
+                    {:else}
+                        <Table columns={rentColumns}>
+                            {#each rentEntries as rent}
+                                <tr class="hover:bg-neutral-50 cursor-pointer" onclick={() => goto(`/rent/${rent.id}`)}>
+                                    <td class="px-4 py-3 text-sm text-neutral-900">
+                                        {new Date(rent.payment_date).toLocaleDateString()}
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-neutral-600">
+                                        {#if rent.tenant_first_name && rent.tenant_last_name}
+                                            {rent.tenant_first_name} {rent.tenant_last_name}
+                                        {:else}
+                                            —
+                                        {/if}
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-green-600 font-medium">
+                                        {formatCurrency(rent.amount)}
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-right" onclick={(e) => e.stopPropagation()}>
+                                        <Button variant="ghost" size="sm" onclick={() => goto(`/rent/${rent.id}`)}>
+                                            View
+                                        </Button>
+                                    </td>
+                                </tr>
+                            {/each}
+                        </Table>
+                    {/if}
+                </Card>
+
+                <!-- Floating Action Button for Rents -->
+                {#if canEdit}
+                    <button
+                        onclick={() => property && goto(`/rent/new?property=${property.id}`)}
+                        class="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all hover:scale-105 z-50"
+                        aria-label="Record Payment"
+                    >
+                        <svg class="h-6 w-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                    </button>
+                {/if}
             {/if}
         </div>
 

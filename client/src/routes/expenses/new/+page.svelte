@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
+    import { page } from '$app/state'; // ✅ Changed from '$app/stores'
     import { Button, Card, Input, Select } from '$lib/components';
     import Tooltip from '$lib/components/Tooltip.svelte';
     import { expenseService, propertyService, unitService } from '$lib/services';
@@ -28,6 +29,8 @@
     let fieldErrors = $state<Record<string, string>>({});
 
     let selectedPropertyId = $state<string>('');
+    let preSelectedPropertyId = $state<string>('');
+    let propertyLocked = $state(false);
     let formData = $state<ExpenseFormData>({
         property: '',
         unit: '',
@@ -41,13 +44,16 @@
     const categoryOptions = expenseCategories.map((c) => ({ value: c.value, label: c.label }));
 
     onMount(async () => {
-        try {
-            properties = await propertyService.getAll();
-        } catch (err) {
-            error = err instanceof Error ? err.message : 'Failed to load data';
-        } finally {
-            loading = false;
+        const propertyParam = page.url.searchParams.get('property');
+        if (propertyParam) {
+            preSelectedPropertyId = propertyParam;
+            selectedPropertyId = propertyParam;
+            propertyLocked = true;
+            await loadUnits();
         }
+        
+        properties = await propertyService.getAll();
+        loading = false;
     });
 
     async function loadUnits() {
@@ -117,7 +123,12 @@
                 unit: formData.unit || undefined
             };
             await expenseService.create(data);
-            goto('/expenses');
+            
+            if (propertyLocked && preSelectedPropertyId) {
+                goto(`/properties/${preSelectedPropertyId}?tab=expenses`);
+            } else {
+                goto('/expenses');
+            }
         } catch (err) {
             error = err instanceof Error ? err.message : 'Failed to record expense';
         } finally {

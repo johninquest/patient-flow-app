@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
-    import { page } from '$app/stores';
+    import { page } from '$app/state';
     import { Button, Card, Input, Table, EmptyState, ConfirmDialog } from '$lib/components';
     import Tooltip from '$lib/components/Tooltip.svelte';
     import { unitService, tenantService, propertyService } from '$lib/services';
@@ -37,7 +37,7 @@
     async function loadData() {
         loading = true;
         error = null;
-        const unitId = $page.params.id;
+        const unitId = page.params.id;
 
         if (!unitId) {
             error = 'Unit ID is required';
