@@ -35,12 +35,11 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - HOST=0.0.0.0
-      - PUBLIC_API_URL=${API_URL}
     labels:
       - "traefik.enable=true"
-      # Client routing
+      # Client routing - using app.popaty.com
       - "traefik.http.routers.popaty-client.entrypoints=websecure"
-      - "traefik.http.routers.popaty-client.rule=Host(`popaty.com`) || Host(`www.popaty.com`)"
+      - "traefik.http.routers.popaty-client.rule=Host(`app.popaty.com`)"
       - "traefik.http.routers.popaty-client.tls=true"
       - "traefik.http.routers.popaty-client.tls.certresolver=letsencrypt"
       - "traefik.http.services.popaty-client.loadbalancer.server.port=3000"

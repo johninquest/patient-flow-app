@@ -11,4 +11,4 @@ const isDev = typeof window !== "undefined" && window.location.hostname === "loc
 
 export const API_URL = isDev
   ? "http://localhost:3000"
-  : "https://api.popaty.com"; // TODO: Update with your production API URL
+  : "https://api.popaty.com";
