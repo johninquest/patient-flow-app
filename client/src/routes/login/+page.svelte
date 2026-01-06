@@ -46,12 +46,13 @@
 
 <div class="flex min-h-screen items-center justify-center bg-neutral-50">
     <div class="w-full max-w-sm space-y-6 rounded-lg bg-white p-8 shadow-md border border-neutral-200">
-        <!-- Add this above your "Sign In" heading -->
+        <!-- Add this above your "Sign In" heading 
         <div class="text-center mb-8">
             <h1 class="text-4xl font-bold text-brand-500 mb-2">
                 {APP_NAME}
             </h1>
         </div>
+        -->
 
         <h2 class="text-xl font-semibold text-gray-700 mb-6 text-center">Sign In</h2>
 

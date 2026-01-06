@@ -1,6 +1,6 @@
 export default {
     // Common
-    'app.name': 'Popati',
+    'app.name': 'Popaty',
     'common.loading': 'Loading...',
     'common.error': 'An error occurred',
     'common.save': 'Save',

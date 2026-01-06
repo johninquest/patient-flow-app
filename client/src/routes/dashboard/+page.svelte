@@ -56,6 +56,11 @@
     function getGranterName(access: UserAccess): string {
         return access.granted_by_name || access.granted_by_email || 'Someone';
     }
+
+    async function handleLogout() {
+        await logout();
+        goto('/login');
+    }
 </script>
 
 <svelte:head>
@@ -86,7 +91,7 @@
                             </svg>
                         </a>
                     </Tooltip>
-                    <Button variant="secondary" onclick={() => logout()}>
+                    <Button variant="secondary" onclick={handleLogout}>
                         {$t('auth.signout')}
                     </Button>
                 </div>
