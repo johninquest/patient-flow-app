@@ -7,7 +7,7 @@
         updateServiceWorker
     } = useRegisterSW({
         onRegistered(registration: ServiceWorkerRegistration | undefined) {
-            console.log('[PWA] Service worker registered');
+            // console.log('[PWA] Service worker registered');
             // Check for updates every hour
             if (registration) {
                 setInterval(() => {

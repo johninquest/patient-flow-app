@@ -54,7 +54,7 @@
             onupdated?.();
             editModalOpen = false;
         } catch (e) {
-            console.error('Failed to update access:', e);
+            // Error is handled silently, user sees no change if it fails
         } finally {
             updating = null;
         }
@@ -73,7 +73,7 @@
             await userAccessService.revokeAccess(revokeTarget.id);
             onrevoked?.();
         } catch (e) {
-            console.error('Failed to revoke access:', e);
+            // Error is handled silently, user sees no change if it fails
         } finally {
             updating = null;
             showConfirm = false;

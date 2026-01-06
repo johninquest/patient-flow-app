@@ -24,10 +24,8 @@
         const user = get(currentUser);
         const authenticated = get(isAuthenticated);
         
-        console.log("[Dashboard] Auth state:", { user, authenticated });
         
         if (!authenticated) {
-            console.log("[Dashboard] Not authenticated, redirecting to login");
             goto('/login');
             return;
         }

@@ -27,7 +27,6 @@ export async function login(email: string, password: string): Promise<AuthResult
 
     return { success: false, error: "Login failed" };
   } catch (e: any) {
-    console.error("Login error:", e);
     return { success: false, error: e.message ?? "Login failed" };
   }
 }
@@ -40,7 +39,6 @@ export async function loginWithGoogle(): Promise<AuthResult> {
     });
     return { success: true };
   } catch (e: any) {
-    console.error("Google login error:", e);
     return { success: false, error: e.message ?? "Google login failed" };
   }
 }
