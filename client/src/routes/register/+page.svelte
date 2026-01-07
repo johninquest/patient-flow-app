@@ -4,6 +4,7 @@
     import FormInput from '$lib/components/FormInput.svelte';
 
     let email = $state('');
+    let name = $state('');
     let password = $state('');
     let passwordConfirm = $state('');
     let error = $state('');
@@ -18,7 +19,7 @@
         loading = true;
         error = '';
         
-        const result = await register(email, password, passwordConfirm);
+        const result = await register(email, password, name);
         
         if (result.success) {
             goto('/');
@@ -39,6 +40,7 @@
         
         <form onsubmit={handleSubmit} class="space-y-4">
             <FormInput id="email" label="Email" type="email" bind:value={email} />
+            <FormInput id="name" label="Name" type="text" bind:value={name} />
             <FormInput id="password" label="Password" type="password" bind:value={password} />
             <FormInput id="passwordConfirm" label="Confirm Password" type="password" bind:value={passwordConfirm} />
             
