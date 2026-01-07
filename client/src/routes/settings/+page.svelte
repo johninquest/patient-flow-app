@@ -9,7 +9,7 @@
     onMount(() => {
         const unsubscribe = currentUser.subscribe(user => {
             if (!user) {
-                goto('/login');
+                goto('/auth/login');
             }
         });
         return unsubscribe;
@@ -22,7 +22,7 @@
 
     async function handleLogout() {
         await logout();
-        goto('/login');
+        goto('/auth/login');
     }
 </script>
 

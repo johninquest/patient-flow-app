@@ -23,6 +23,7 @@ export default {
     'auth.signup.loading': 'Creating account...',
     'auth.login.failed': 'Login failed',
     'auth.google.failed': 'Google login failed',
+    'auth.register': 'Register',
     
     // Dashboard
     'dashboard.title': 'Dashboard',

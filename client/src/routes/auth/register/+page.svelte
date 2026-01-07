@@ -2,6 +2,7 @@
     import { goto } from '$app/navigation';
     import { register } from '$lib/auth/register';
     import FormInput from '$lib/components/FormInput.svelte';
+    import { APP_NAME } from '$lib/config';
 
     let email = $state('');
     let name = $state('');
@@ -30,6 +31,10 @@
     }
 </script>
 
+<svelte:head>
+    <title>Register | {APP_NAME}</title>
+</svelte:head>
+
 <div class="flex min-h-screen items-center justify-center bg-gray-50">
     <div class="w-full max-w-sm space-y-6 rounded-lg bg-white p-8 shadow">
         <h1 class="text-2xl font-bold">Create account</h1>
@@ -54,7 +59,7 @@
         </form>
         
         <p class="text-center text-sm">
-            Have an account? <a href="/login" class="text-blue-600 hover:underline">Sign in</a>
+            Have an account? <a href="/auth/login" class="text-blue-600 hover:underline">Sign in</a>
         </p>
     </div>
 </div>

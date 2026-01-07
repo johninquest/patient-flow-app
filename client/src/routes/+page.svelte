@@ -10,7 +10,7 @@
                     if (authenticated) {
                         goto('/dashboard');
                     } else {
-                        goto('/login');
+                        goto('/auth/login');
                     }
                 });
             }

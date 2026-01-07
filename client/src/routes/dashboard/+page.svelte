@@ -26,7 +26,7 @@
         
         
         if (!authenticated) {
-            goto('/login');
+            goto('/auth/login');
             return;
         }
 
@@ -57,7 +57,7 @@
 
     async function handleLogout() {
         await logout();
-        goto('/login');
+        goto('/auth/login');
     }
 </script>
 
