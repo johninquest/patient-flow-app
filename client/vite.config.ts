@@ -48,7 +48,6 @@ export default defineConfig({
             },
             workbox: {
                 globPatterns: ['client/**/*.{js,css,ico,png,svg,webp,woff,woff2}'],
-                navigateFallback: '/',
                 runtimeCaching: [
                     {
                         urlPattern: /^https:\/\/api\.popaty\.com\/.*/i,
@@ -97,8 +96,7 @@ export default defineConfig({
             devOptions: {
                 enabled: true,
                 suppressWarnings: true,
-                type: 'module',
-                navigateFallback: '/'
+                type: 'module'
             },
             kit: {
                 includeVersionFile: true
