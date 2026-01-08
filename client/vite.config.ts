@@ -23,23 +23,28 @@ export default defineConfig({
                 display: 'standalone',
                 theme_color: '#8c6a3a',
                 background_color: '#F9FAFB',
-                description: 'Property rent and expense management app',
+                description: 'Property rent and expense management app', 
+                id: '/',
+                orientation: 'portrait-primary',
+                categories: ['business', 'finance', 'productivity'],
                 icons: [
                     {
                         src: '/icon-192.png',
                         sizes: '192x192',
-                        type: 'image/png'
+                        type: 'image/png', 
+                        purpose: 'any'
                     },
                     {
                         src: '/icon-512.png',
                         sizes: '512x512',
-                        type: 'image/png'
+                        type: 'image/png', 
+                        purpose: 'any'
                     },
                     {
                         src: '/icon-512-maskable.png',
                         sizes: '512x512',
                         type: 'image/png',
-                        purpose: 'any maskable'
+                        purpose: 'maskable'
                     }
                 ]
             },
