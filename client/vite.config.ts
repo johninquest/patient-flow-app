@@ -41,6 +41,8 @@ export default defineConfig({
                 ]
             },
             workbox: {
+                navigateFallback: '/',
+                additionalManifestEntries: [{ url: '/', revision: null }],
                 globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff,woff2}'],
                 runtimeCaching: [
                     {
