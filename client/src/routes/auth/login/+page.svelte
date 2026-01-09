@@ -44,20 +44,37 @@
     <title>{$t('auth.signin')} | {$t('app.name')}</title>
 </svelte:head>
 
-<div class="flex min-h-screen items-center justify-center bg-neutral-50">
+<div class="flex min-h-screen items-center justify-center bg-neutral-50 p-4">
     <div class="w-full max-w-sm space-y-6 rounded-lg bg-white p-8 shadow-md border border-neutral-200">
-        <!-- Add this above your "Sign In" heading 
-        <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-brand-500 mb-2">
+        
+        <!-- Brand Header Section -->
+        <div class="text-center mb-8 border-b border-neutral-100 pb-6">
+            <h1 class="text-3xl font-bold tracking-tight text-brand-600">
                 {APP_NAME}
             </h1>
+            <p class="text-xs font-medium uppercase tracking-wide text-neutral-500 mt-1.5">
+                Property rent & expense manager
+            </p>
         </div>
-        -->
 
-        <h2 class="text-xl font-semibold text-gray-700 mb-6 text-center">Sign In</h2>
+        <!-- Replaced "Sign In" header to be more subtle -->
+        <h2 class="text-sm font-medium text-neutral-500 text-center uppercase tracking-wider mb-4">
+            Sign in to your account
+        </h2>
 
         {#if error}
-            <p class="rounded bg-red-100 p-3 text-red-700 text-sm">{error}</p>
+            <div class="rounded-md bg-red-50 p-3 border border-red-100">
+                <div class="flex">
+                    <div class="shrink-0">
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-700">{error}</p>
+                    </div>
+                </div>
+            </div>
         {/if}
 
         <form onsubmit={handleSubmit} class="space-y-4">
@@ -94,25 +111,25 @@
             <button
                 type="submit"
                 disabled={loading}
-                class="w-full rounded bg-brand-500 py-2.5 text-white font-medium hover:bg-brand-600 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
+                class="w-full rounded bg-brand-500 py-2.5 text-white font-medium hover:bg-brand-600 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 shadow-sm"
             >
                 {loading ? $t('auth.signin.loading') : $t('auth.signin')}
             </button>
         </form>
 
-        <div class="relative">
+        <div class="relative my-6">
             <div class="absolute inset-0 flex items-center">
-                <div class="w-full border-t border-neutral-300"></div>
+                <div class="w-full border-t border-neutral-200"></div>
             </div>
             <div class="relative flex justify-center text-sm">
-                <span class="bg-white px-2 text-neutral-500">{$t('auth.or')}</span>
+                <span class="bg-white px-3 text-neutral-500 font-medium">{$t('auth.or')}</span>
             </div>
         </div>
 
         <button
             onclick={handleGoogleLogin}
             disabled={loading}
-            class="flex w-full items-center justify-center gap-3 rounded border border-neutral-300 bg-white py-2.5 text-neutral-700 font-medium hover:bg-neutral-50 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-2"
+            class="flex w-full items-center justify-center gap-3 rounded border border-neutral-300 bg-white py-2.5 text-neutral-700 font-medium hover:bg-neutral-50 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-2 shadow-sm"
         >
             <svg class="h-5 w-5" viewBox="0 0 24 24">
                 <path
@@ -131,7 +148,7 @@
                     fill="#EA4335"
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
-            </svg>
+            </svg> 
             {$t('auth.continue.google')}
         </button>
 
