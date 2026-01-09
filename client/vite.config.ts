@@ -12,14 +12,15 @@ export default defineConfig({
             srcDir: 'src',
             mode: 'production',
             strategies: 'generateSW',
-            scope: './',
-            base: './',
+            scope: '/',
+            base: '/',
             selfDestroying: process.env.SELF_DESTROYING_SW === 'true',
             manifest: {
+                id: '/',
                 short_name: 'Popaty',
                 name: 'Popaty',
-                start_url: './',
-                scope: './',
+                start_url: '/',
+                scope: '/',
                 display: 'standalone',
                 theme_color: '#8c6a3a',
                 background_color: '#F9FAFB',
@@ -43,7 +44,7 @@ export default defineConfig({
                 globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff,woff2}'],
                 runtimeCaching: [
                     {
-                        urlPattern: /^https:\/\/api\.popaty\.com\/.*/i,
+                        urlPattern: ({ url }) => url.origin === 'https://api.popaty.com',
                         handler: 'NetworkFirst',
                         options: {
                             cacheName: 'api-cache',
@@ -57,7 +58,7 @@ export default defineConfig({
                         }
                     },
                     {
-                        urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+                        urlPattern: ({ url }) => url.origin === 'https://fonts.googleapis.com',
                         handler: 'CacheFirst',
                         options: {
                             cacheName: 'google-fonts-cache',
@@ -71,7 +72,7 @@ export default defineConfig({
                         }
                     },
                     {
-                        urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+                        urlPattern: ({ url }) => url.origin === 'https://fonts.gstatic.com',
                         handler: 'CacheFirst',
                         options: {
                             cacheName: 'gstatic-fonts-cache',
