@@ -127,7 +127,7 @@
                     <Tooltip text={$t('tooltip.settings')} position="bottom">
                         <a
                             href="/settings"
-                            class="p-2 text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 rounded-md transition-colors"
+                            class="p-2 text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 rounded-md transition-colors flex items-center"
                             aria-label={$t('tooltip.settings')}
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
