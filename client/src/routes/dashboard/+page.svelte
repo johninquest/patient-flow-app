@@ -6,8 +6,8 @@
     import { propertyService } from '$lib/services/property.service';
     import { userAccessService } from '$lib/services/user-access.service';
     import { currentUser, isAuthenticated, logout } from '$lib/auth';
-    import { t } from '$lib/i18n';
-    import { APP_NAME } from '$lib/config';
+    import { t, locale, setLocale, type Locale } from '$lib/i18n';
+    import { APP_NAME, SUPPORTED_LOCALES } from '$lib/config';
     import type { Property } from '$lib/types/property.types';
     import type { UserAccess } from '$lib/types/user-access.types';
     import { get } from 'svelte/store';
@@ -16,6 +16,7 @@
     let ownedProperties = $state<Property[]>([]);
     let sharedAccess = $state<UserAccess[]>([]);
     let userName = $state('');
+    let showLanguageMenu = $state(false);
 
     const hasAnyAccess = $derived(ownedProperties.length > 0 || sharedAccess.length > 0);
 
@@ -59,6 +60,11 @@
         await logout();
         goto('/auth/login');
     }
+
+    function handleLanguageChange(newLocale: Locale) {
+        setLocale(newLocale);
+        showLanguageMenu = false;
+    }
 </script>
 
 <svelte:head>
@@ -75,6 +81,49 @@
                     <p class="text-sm text-neutral-500 mt-1">Welcome back, {userName}</p>
                 </div>
                 <div class="flex items-center gap-3">
+                    <!-- Language Toggle -->
+                    <div class="relative">
+                        <Tooltip text={$t('settings.language')} position="bottom">
+                            <button
+                                onclick={() => showLanguageMenu = !showLanguageMenu}
+                                class="p-2 text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 rounded-md transition-colors"
+                                aria-label={$t('settings.language')}
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                                </svg>
+                            </button>
+                        </Tooltip>
+                        
+                        {#if showLanguageMenu}
+                            <button 
+                                class="fixed inset-0 z-10" 
+                                onclick={() => showLanguageMenu = false}
+                                aria-label="Close menu"
+                            ></button>
+                            
+                            <div class="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg border border-neutral-200 z-20">
+                                <div class="py-1">
+                                    {#each SUPPORTED_LOCALES as loc}
+                                        <button
+                                            onclick={() => handleLanguageChange(loc.code as Locale)}
+                                            class="w-full px-4 py-2 text-left text-sm hover:bg-neutral-100 flex items-center justify-between
+                                                {$locale === loc.code ? 'text-brand-600 font-medium' : 'text-neutral-700'}"
+                                        >
+                                            {loc.name}
+                                            {#if $locale === loc.code}
+                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                                </svg>
+                                            {/if}
+                                        </button>
+                                    {/each}
+                                </div>
+                            </div>
+                        {/if}
+                    </div>
+
                     <Tooltip text={$t('tooltip.settings')} position="bottom">
                         <a
                             href="/settings"
