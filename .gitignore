@@ -11,6 +11,7 @@ npm-debug.log*
 dist/
 build/
 *.log
+client/dev-dist/
 
 # IDE
 .vscode/
