@@ -7,6 +7,9 @@ async function bootstrap() {
   // Enable CORS for the SvelteKit client with credentials
   const allowedOrigins = process.env.CLIENT_URL?.split(',').map(url => url.trim()) || ['http://localhost:5173'];
   
+  console.log('Allowed CORS origins:', allowedOrigins);
+  console.log('CLIENT_URL env variable:', process.env.CLIENT_URL);
+  
   app.enableCors({
     origin: allowedOrigins, // ✅ Use array of origins
     credentials: true,

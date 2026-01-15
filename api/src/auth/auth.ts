@@ -11,6 +11,13 @@ let authInstance: ReturnType<typeof betterAuth> | null = null;
  */
 export function getAuth() {
   if (!authInstance) {
+    const allowedOrigins = process.env.CLIENT_URL?.split(',').map(url => url.trim()) || ['http://localhost:5173'];
+    
+    console.log('=== Better Auth Configuration ===');
+    console.log('CLIENT_URL env variable:', process.env.CLIENT_URL);
+    console.log('Trusted origins:', allowedOrigins);
+    console.log('=================================');
+    
     authInstance = betterAuth({
       database: drizzleAdapter(db, {
         provider: "pg",
@@ -33,7 +40,7 @@ export function getAuth() {
           clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
         },
       },
-      trustedOrigins: [process.env.CLIENT_URL || "http://localhost:5173"],
+      trustedOrigins: allowedOrigins,
       advanced: {
         crossSubDomainCookies: {
           enabled: false,
