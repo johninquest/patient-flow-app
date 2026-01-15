@@ -1,39 +1,52 @@
-# Production Dockerfile for Client (Node/SvelteKit)
-FROM node:24-alpine AS builder
+# Production Dockerfile for Client (Bun + Static Build)
+FROM oven/bun:1-alpine AS builder
 
 WORKDIR /app
 
 # Install dependencies
-COPY package.json package-lock.json* ./
-RUN npm ci
+COPY package.json bun.lockb* ./
+RUN bun install --frozen-lockfile || bun install
 
 # Copy source code
 COPY . .
 
-# Build with Node adapter (default, no ADAPTER env var)
-RUN npm run build
+# Build static site
+RUN bun run build
 
-# Production stage
-FROM node:24-alpine AS production
+# Production stage - serve static files with Bun
+FROM oven/bun:1-alpine AS production
 
 WORKDIR /app
 
-# Copy built application
-COPY --from=builder /app/build ./build
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/package-lock.json* ./
+# Install a simple static file server
+RUN bun add serve-static-bun
 
-# Install only production dependencies
-RUN npm ci --omit=dev
+# Copy built static files
+COPY --from=builder /app/build ./build
+
+# Create simple server script
+RUN echo 'Bun.serve({ \
+  port: 3000, \
+  async fetch(req) { \
+    const url = new URL(req.url); \
+    let path = url.pathname; \
+    if (path === "/") path = "/index.html"; \
+    const file = Bun.file("./build" + path); \
+    if (await file.exists()) { \
+      return new Response(file); \
+    } \
+    return new Response(Bun.file("./build/index.html")); \
+  } \
+}); \
+console.log("Static server running on port 3000");' > server.js
 
 # Create non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S sveltekit -u 1001 -G nodejs && \
-    chown -R sveltekit:nodejs /app
+RUN addgroup -g 1001 -S bunjs && \
+    adduser -S sveltekit -u 1001 -G bunjs && \
+    chown -R sveltekit:bunjs /app
 
 USER sveltekit
 
 EXPOSE 3000
 
-ENV NODE_ENV=production
-CMD ["node", "build"]
+CMD ["bun", "run", "server.js"]
