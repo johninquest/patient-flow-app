@@ -27,19 +27,19 @@ export default {
     'auth.google.failed': 'Échec de la connexion avec Google',
     'auth.register': 'S\'inscrire',
 
-    // Dashboard
-    'dashboard.title': 'Tableau de bord',
-    'dashboard.welcome': 'Bienvenue, {{name}}',
-    'dashboard.welcome.new': 'Bienvenue sur Popaty!',
-    'dashboard.welcome.message': 'Vous êtes maintenant connecté à votre tableau de bord.',
-    'dashboard.no.properties': 'Vous n\'avez accès à aucune propriété pour le moment. Créez votre première propriété pour commencer.',
-    'dashboard.my.properties': 'Mes Propriétés',
-    'dashboard.shared.with.me': 'Partagé avec moi ({{count}})',
-    'dashboard.quick.actions': 'Actions Rapides',
-    'dashboard.add.property': 'Ajouter une propriété',
-    'dashboard.owner': 'Propriétaire',
-    'dashboard.shared.by': 'Partagé par {{name}}',
-    'dashboard.close.menu': 'Fermer le menu',
+    // Dashboard 
+    "dashboard.title": "Tableau de bord",
+    "dashboard.welcome": "Bienvenue, {{name}}",
+    "dashboard.welcome.new": "Bienvenue sur Popaty !",
+    "dashboard.welcome.message": "Vous êtes maintenant connecté à votre tableau de bord.",
+    "dashboard.no.properties": "Vous n'avez aucun immobilier pour le moment. Créez votre première immobilier pour commencer.",
+    "dashboard.my.properties": "Mes immobiliers",
+    "dashboard.shared.with.me": "Partagés avec moi ({{count}})",
+    "dashboard.quick.actions": "Actions rapides",
+    "dashboard.add.property": "Ajouter un immobilier",
+    "dashboard.owner": "Propriétaire",
+    "dashboard.shared.by": "Partagé par {{name}}",
+    "dashboard.close.menu": "Fermer le menu",
 
     // Quick Actions
     'actions.record.rent': 'Enregistrer le loyer',
