@@ -39,7 +39,7 @@ services:
       - "traefik.enable=true"
       # Client routing - using app.popaty.com
       - "traefik.http.routers.popaty-client.entrypoints=websecure"
-      - "traefik.http.routers.popaty-client.rule=Host(`app.popaty.com`)"
+      - "traefik.http.routers.popaty-client.rule=Host(`app2.popaty.com`)"
       - "traefik.http.routers.popaty-client.tls=true"
       - "traefik.http.routers.popaty-client.tls.certresolver=letsencrypt"
       - "traefik.http.services.popaty-client.loadbalancer.server.port=3000"
