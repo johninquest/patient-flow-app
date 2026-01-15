@@ -94,6 +94,16 @@ docker-compose exec api npm run migration:run
 
 ## Deployment
 
+### Client Build Options
+
+The client supports two build modes via the `ADAPTER` environment variable:
+
+| Command | Adapter | Output | Use Case |
+|---------|---------|--------|----------|
+| `npm run build` | Node | `build/` (server) | Docker self-hosted |
+| `npm run build:static` | Static | `build/` (static) | Firebase Hosting |
+| `npm run deploy:firebase` | Static | Firebase | Deploy to Firebase |
+
 ### Production Deployment with Docker
 
 **Prerequisites:**
@@ -148,6 +158,23 @@ docker-compose -f docker-compose.prod.yml restart
 
 # Stop and remove containers
 docker-compose -f docker-compose.prod.yml down
+```
+
+### Firebase Hosting Deployment
+
+**Prerequisites:**
+- Firebase CLI installed (`npm install -g firebase-tools`)
+- Firebase project created
+
+**Deploy:**
+```bash
+cd client
+
+# Login to Firebase (first time only)
+firebase login
+
+# Build and deploy
+npm run deploy:firebase
 ```
 
 ## Environment Variables

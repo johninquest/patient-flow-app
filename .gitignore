@@ -29,3 +29,10 @@ coverage/
 
 # Design files
 # plans/
+
+# Firebase Hosting
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+client/build/
+client/public/index.html
