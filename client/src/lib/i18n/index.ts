@@ -2,13 +2,13 @@ import { writable, derived } from 'svelte/store';
 import en from './locales/en';
 import fr from './locales/fr';
 
-export type Locale = 'en' | 'fr' | 'de';
+// Remove 'de' from Locale type since it's not supported
+export type Locale = 'en' | 'fr';
 export type TranslationKey = keyof typeof en;
 
 const translations: Record<Locale, Record<string, string>> = {
     en,
-    fr,
-    de: en  // Fallback to English until German is added
+    fr
 };
 
 // Current locale store
@@ -52,15 +52,16 @@ export function initLocale() {
         const browserLang = navigator.language.toLowerCase();
         console.log('[i18n] Detected browser language:', browserLang);
         
+        // Only set to French if browser is French, otherwise default to English
         if (browserLang.startsWith('fr')) {
             console.log('[i18n] Setting locale to: fr');
             locale.set('fr');
-        } else if (browserLang.startsWith('de')) {
-            console.log('[i18n] Setting locale to: de');
-            locale.set('de');
+            localStorage.setItem('locale', 'fr');
         } else {
+            // Default to English for all unsupported languages
             console.log('[i18n] Setting locale to: en (default)');
-            locale.set('en'); // Default fallback
+            locale.set('en');
+            localStorage.setItem('locale', 'en');
         }
     }
 }
