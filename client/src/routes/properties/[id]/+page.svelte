@@ -12,7 +12,8 @@
         Input, 
         ConfirmDialog,
         Select,
-        PermissionButton // ✅ Import
+        PermissionButton, 
+        Tooltip
     } from '$lib/components';
     import ActivityFeed from '$lib/components/ActivityFeed.svelte';
     import GrantAccessModal from '$lib/components/GrantAccessModal.svelte';
@@ -504,17 +505,19 @@
 
                     <!-- ✅ Use PermissionButton -->
                     <div class="flex gap-2 items-start">
-                        <PermissionButton 
-                            loading={permissionsLoading} 
-                            show={canManageAccess}
-                            variant="secondary"
-                            onclick={() => grantAccessModalOpen = true}
-                        >
-                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                            </svg>
-                            Share
-                        </PermissionButton>
+                        <Tooltip text="Grant another user access to this property" position="bottom">
+                            <PermissionButton 
+                                loading={permissionsLoading} 
+                                show={canManageAccess}
+                                variant="secondary"
+                                onclick={() => grantAccessModalOpen = true}
+                            >
+                                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                </svg>
+                                Grant Access
+                            </PermissionButton>
+                        </Tooltip>
 
                         <PermissionButton 
                             loading={permissionsLoading} 
