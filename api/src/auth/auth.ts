@@ -43,11 +43,12 @@ export function getAuth() {
       trustedOrigins: allowedOrigins,
       advanced: {
         crossSubDomainCookies: {
-          enabled: false,
+          enabled: true,
+          domain: ".popaty.com",
         },
         defaultCookieAttributes: {
           sameSite: "lax",
-          secure: false, // Set to true in production with HTTPS
+          secure: true, // ✅ Must be true for HTTPS
           httpOnly: true,
         },
       },
