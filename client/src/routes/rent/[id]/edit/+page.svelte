@@ -5,7 +5,7 @@
     import { Button, Card, Input, Select } from '$lib/components';
     import Tooltip from '$lib/components/Tooltip.svelte';
     import { rentService, tenantService, propertyService } from '$lib/services';
-    import { getCurrencyByCountry } from '$lib/types/currency.types';
+    import { getCurrencyByCountryCode } from '$lib/types/currency.types';
     import { paymentMethods, type PaymentMethod } from '$lib/types';
     import { validateRentEntry } from '$lib/validation';
     import { t } from '$lib/i18n';
@@ -130,8 +130,8 @@
 
     function getCurrencyCode(): string {
         if (!property) return '';
-        const currency = getCurrencyByCountry(property.country);
-        return currency?.code ?? '';
+        const currency = getCurrencyByCountryCode(property.country);
+        return currency?.currencyCode ?? '';
     }
 
     async function handleSubmit(e: Event) {

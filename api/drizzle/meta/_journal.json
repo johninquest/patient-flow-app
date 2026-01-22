@@ -43,6 +43,13 @@
       "when": 1767060265463,
       "tag": "0005_gifted_jack_power",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1769080006907,
+      "tag": "0006_lethal_khan",
+      "breakpoints": true
     }
   ]
 }

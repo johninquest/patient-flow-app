@@ -3,9 +3,9 @@ FROM node:24-alpine
 
 WORKDIR /app
 
-# Install dependencies
+# Install dependencies first (better caching)
 COPY package.json package-lock.json* ./
-RUN npm install
+RUN npm ci
 
 # Copy source code
 COPY . .

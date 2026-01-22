@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, integer, decimal, uuid, unique, check, jsonb, index } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, decimal, uuid, unique, check, jsonb, index, varchar } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
 export const user = pgTable("user", {
@@ -55,7 +55,7 @@ export const properties = pgTable("properties", {
   id: uuid("id").primaryKey().default(sql`uuidv7()`),
   name: text("name").notNull(),
   city: text("city").notNull(),
-  country: text("country").notNull(),
+  country: varchar("country", { length: 3 }).notNull(), // ISO 3166-1 alpha-3 code
   construction_year: integer("construction_year"),
   owner: text("owner").notNull().references(() => user.id, { onDelete: "cascade" }),
   created: timestamp("created").defaultNow().notNull(),

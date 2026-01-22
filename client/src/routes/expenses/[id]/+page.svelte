@@ -5,7 +5,7 @@
     import { Button, Card, ConfirmDialog } from '$lib/components';
     import Tooltip from '$lib/components/Tooltip.svelte';
     import { expenseService, propertyService, unitService } from '$lib/services';
-    import { getCurrencyByCountry } from '$lib/types/currency.types';
+    import { getCurrencyByCountryCode } from '$lib/types/currency.types';
     import { expenseCategories } from '$lib/types';
     import { t } from '$lib/i18n';
     import type { Expense, Property, Unit } from '$lib/types';
@@ -65,8 +65,8 @@
 
     function formatCurrency(amount: number): string {
         if (!property) return amount.toLocaleString();
-        const currency = getCurrencyByCountry(property.country);
-        return `${currency?.symbol ?? currency?.code ?? ''} ${amount.toLocaleString()}`;
+        const currency = getCurrencyByCountryCode(property.country);
+        return `${currency?.symbol ?? currency?.currencyCode ?? ''} ${amount.toLocaleString()}`;
     }
 
     function formatDate(dateStr: string): string {

@@ -1,4 +1,4 @@
-import { IsString, IsInt, IsOptional } from 'class-validator';
+import { IsString, IsInt, IsOptional, Length, Matches } from 'class-validator';
 
 export class CreatePropertyDto {
   @IsString()
@@ -8,7 +8,9 @@ export class CreatePropertyDto {
   city: string;
 
   @IsString()
-  country: string;
+  @Length(3, 3)
+  @Matches(/^[A-Z]{3}$/, { message: 'country must be a valid ISO 3166-1 alpha-3 code' })
+  country: string; // Now expects ISO 3166-1 alpha-3 code (e.g., 'CMR')
 
   @IsOptional()
   @IsInt()

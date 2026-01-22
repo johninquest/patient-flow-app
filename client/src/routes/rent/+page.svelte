@@ -4,7 +4,7 @@
     import { Button, Card, Table, EmptyState, Select } from '$lib/components';
     import Tooltip from '$lib/components/Tooltip.svelte';
     import { rentService, propertyService } from '$lib/services';
-    import { getCurrencyByCountry } from '$lib/types/currency.types';
+    import { getCurrencyByCountryCode } from '$lib/types/currency.types';
     import { t } from '$lib/i18n';
     import type { RentEntry, Property } from '$lib/types';
 
@@ -76,8 +76,8 @@
     function formatAmount(amount: number): string {
         const property = getSelectedProperty();
         if (!property) return amount.toFixed(2);
-        const currency = getCurrencyByCountry(property.country);
-        return `${currency?.code ?? ''} ${amount.toLocaleString()}`;
+        const currency = getCurrencyByCountryCode(property.country);
+        return `${currency?.currencyCode ?? ''} ${amount.toLocaleString()}`;
     }
 
     function formatDate(dateStr: string): string {

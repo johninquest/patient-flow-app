@@ -2,7 +2,7 @@
     import { goto } from '$app/navigation';
     import { Button, Input } from '$lib/components';
     import { propertyService } from '$lib/services';
-    import { getCountryList } from '$lib/types/currency.types';
+    import { getCountryCodeList, getCountryCode } from '$lib/types/currency.types';
     import type { PropertyFormData } from '$lib/types';
 
     let loading = $state(false);
@@ -15,7 +15,10 @@
         construction_year: undefined
     });
 
-    const countryOptions = getCountryList().map((c) => ({ value: c, label: c }));
+    const countryOptions = getCountryCodeList().map((c) => ({ 
+        value: c.code, 
+        label: c.name 
+    }));
 
     async function handleSubmit(e: Event) {
         e.preventDefault();
@@ -23,20 +26,20 @@
         error = null;
 
         try {
-            // Remove undefined construction_year before sending
             const data: any = {
                 name: formData.name,
                 city: formData.city,
-                country: formData.country,
+                country: formData.country, // Now sends country code
             };
             
             if (formData.construction_year !== undefined) {
                 data.construction_year = formData.construction_year;
             }
 
-            const property = await propertyService.create(data);
-            goto(`/properties/${property.id}`);
+            const newProperty = await propertyService.create(data);
+            goto(`/properties/${newProperty.id}`);
         } catch (err) {
+            console.error('Failed to create property:', err);
             error = err instanceof Error ? err.message : 'Failed to create property';
         } finally {
             loading = false;
@@ -45,33 +48,28 @@
 </script>
 
 <svelte:head>
-    <title>New Property | Popati</title>
+    <title>Add Property | Popati</title>
 </svelte:head>
 
-<div class="min-h-screen bg-neutral-50 px-4 py-8">
-    <div class="mx-auto max-w-lg">
-        <!-- Header -->
-        <div class="mb-8">
+<div class="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
+    <div class="space-y-6">
+        <div class="flex items-center gap-3">
             <button
                 onclick={() => goto('/properties')}
-                class="mb-4 inline-flex items-center gap-1.5 text-sm text-neutral-600 transition-colors hover:text-brand-500"
+                aria-label="Go back to properties"
+                class="p-2 text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 rounded-md transition-colors"
             >
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-                Back
             </button>
-            <h1 class="text-2xl font-semibold text-neutral-900">New Property</h1>
-            <p class="mt-1 text-sm text-neutral-600">Add a rental property to your portfolio</p>
+            <h1 class="text-2xl font-semibold text-neutral-900">Add New Property</h1>
         </div>
 
-        <!-- Form -->
-        <div class="rounded-lg border border-neutral-200 bg-white p-6 shadow-sm">
-            <form onsubmit={handleSubmit} class="space-y-5">
+        <div class="bg-white rounded-lg border border-neutral-200 p-6">
+            <form onsubmit={handleSubmit} class="space-y-4">
                 {#if error}
-                    <div class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                        {error}
-                    </div>
+                    <div class="rounded-lg bg-red-500/10 p-3 text-sm text-red-400">{error}</div>
                 {/if}
 
                 <Input
@@ -83,14 +81,8 @@
                 />
 
                 <div class="grid gap-4 sm:grid-cols-2">
-                    <Input
-                        id="city"
-                        label="City"
-                        bind:value={formData.city}
-                        placeholder="e.g., Douala"
-                        required
-                    />
-
+                    <Input id="city" label="City" bind:value={formData.city} placeholder="e.g., Nairobi" required />
+                    
                     <div>
                         <label for="country" class="mb-1.5 block text-sm font-medium text-neutral-700">
                             Country <span class="text-red-500">*</span>
@@ -118,28 +110,16 @@
                         id="construction_year"
                         type="number"
                         min="1900"
-                        max={new Date().getFullYear()}
+                        max={new Date().getFullYear() + 5}
                         bind:value={formData.construction_year}
-                        placeholder="e.g., 2015"
-                        class="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-neutral-900 placeholder-neutral-400 transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                        placeholder="e.g., 2020"
+                        class="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-neutral-900 transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                     />
                 </div>
 
-                <div class="flex justify-end gap-3 pt-2">
-                    <button
-                        type="button"
-                        onclick={() => goto('/properties')}
-                        class="rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-100"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        class="rounded-md bg-brand-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-600 disabled:opacity-50"
-                    >
-                        {loading ? 'Creating...' : 'Create Property'}
-                    </button>
+                <div class="flex justify-end gap-3 pt-4">
+                    <Button variant="secondary" onclick={() => goto('/properties')}>Cancel</Button>
+                    <Button type="submit" {loading}>Create Property</Button>
                 </div>
             </form>
         </div>

@@ -1,11 +1,11 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
-    import { page } from '$app/state'; // ✅ Changed from '$app/stores'
+    import { page } from '$app/state';
     import { Button, Card, Input, Select } from '$lib/components';
     import Tooltip from '$lib/components/Tooltip.svelte';
     import { expenseService, propertyService, unitService } from '$lib/services';
-    import { getCurrencyByCountry } from '$lib/types/currency.types';
+    import { getCurrencyByCountryCode } from '$lib/types/currency.types';
     import { expenseCategories, type ExpenseCategory, type Property, type Unit } from '$lib/types';
     import { validateExpense } from '$lib/validation';
     import { t } from '$lib/i18n';
@@ -84,8 +84,8 @@
     function getCurrencyCode(): string {
         const property = getSelectedProperty();
         if (!property) return '';
-        const currency = getCurrencyByCountry(property.country);
-        return currency?.code ?? '';
+        const currency = getCurrencyByCountryCode(property.country);
+        return currency?.currencyCode ?? '';
     }
 
     function clearFieldError(field: string) {
@@ -217,10 +217,7 @@
                             <Select
                                 label="Unit (Optional)"
                                 bind:value={formData.unit}
-                                options={[
-                                    { value: '', label: 'Property-wide expense' },
-                                    ...units.map((u) => ({ value: u.id, label: `${u.unit_number}${u.unit_name ? ` - ${u.unit_name}` : ''}` }))
-                                ]}
+                                options={units.map((u) => ({ value: u.id, label: `${u.unit_number}${u.unit_name ? ` - ${u.unit_name}` : ''}` }))}
                             />
                         {/if}
                     {/if}

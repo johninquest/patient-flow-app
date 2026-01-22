@@ -107,17 +107,23 @@ export class TenantService {
       .where(eq(user.id, userId))
       .limit(1);
 
+    // Prepare update data - convert empty unit string to null
+    const updateData = {
+      ...data,
+      unit: data.unit || null, // Convert empty string to null for UUID field
+    };
+
     // Calculate changes
     const changes = this.activityService.calculateChanges(
       tenant,
-      data,
+      updateData,
       ['first_name', 'last_name', 'phone', 'unit', 'active'],
     );
 
     const [updated] = await db
       .update(tenants)
       .set({
-        ...data,
+        ...updateData,
         updated: new Date(),
       })
       .where(eq(tenants.id, id))

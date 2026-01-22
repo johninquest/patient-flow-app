@@ -8,6 +8,7 @@
     import { currentUser, isAuthenticated, logout } from '$lib/auth';
     import { t, locale, setLocale, type Locale } from '$lib/i18n';
     import { APP_NAME, SUPPORTED_LOCALES } from '$lib/config';
+    import { getCountryName } from '$lib/types/currency.types';
     import type { Property } from '$lib/types/property.types';
     import type { UserAccess } from '$lib/types/user-access.types';
     import { get } from 'svelte/store';
@@ -48,7 +49,7 @@
     }
 
     function getPropertyLocation(access: UserAccess): string {
-        const parts = [access.property_city, access.property_country].filter(Boolean);
+        const parts = [access.property_city, access.property_country ? getCountryName(access.property_country) : null].filter(Boolean);
         return parts.join(', ') || '';
     }
 
@@ -198,7 +199,7 @@
                                             <div>
                                                 <h3 class="font-medium text-neutral-900">{property.name}</h3>
                                                 <p class="text-sm text-neutral-500 mt-1">
-                                                    {[property.city, property.country].filter(Boolean).join(', ')}
+                                                    {[property.city, getCountryName(property.country)].filter(Boolean).join(', ')}
                                                 </p>
                                             </div>
                                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-brand-100 text-brand-700">

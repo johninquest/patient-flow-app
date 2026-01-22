@@ -3,6 +3,7 @@
     import { goto } from '$app/navigation';
     import { page } from '$app/state';
     import { permissions, createPropertyPermissions } from '$lib/stores/permissions';
+    import { getCountryName } from '$lib/types/currency.types';
     import { 
         Card, 
         Button, 
@@ -496,7 +497,7 @@
                     <div>
                         <h1 class="text-3xl font-bold text-neutral-900">{property.name}</h1>
                         <p class="text-neutral-600 mt-2">
-                            {[property.city, property.country].filter(Boolean).join(', ')}
+                            {[property.city, getCountryName(property.country)].filter(Boolean).join(', ')}
                             {#if property.construction_year}
                                 • Built {property.construction_year}
                             {/if}

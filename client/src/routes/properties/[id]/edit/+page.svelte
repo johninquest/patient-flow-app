@@ -1,11 +1,16 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
-    import { page } from '$app/stores';
+    import { page } from '$app/state';
     import { Button, Card, Input, Select } from '$lib/components';
+    import Tooltip from '$lib/components/Tooltip.svelte';
     import { propertyService } from '$lib/services';
-    import { getCountryList } from '$lib/types/currency.types';
+    import { getCountryCodeList } from '$lib/types/currency.types';
+    import { t } from '$lib/i18n';
     import type { Property, PropertyFormData } from '$lib/types';
+
+    // Extract and validate the property ID
+    const propertyId = $derived(page.params.id ?? '');
 
     let property = $state<Property | null>(null);
     let loading = $state(true);
@@ -19,17 +24,32 @@
         construction_year: undefined
     });
 
-    const countryOptions = getCountryList().map((c) => ({ value: c, label: c }));
+    let constructionYearStr = $state<string>('');
+
+    // Use country code list (code as value, name as label)
+    const countryOptions = getCountryCodeList().map((c) => ({ value: c.code, label: c.name }));
+
+    // Sync construction year whenever the string changes
+    $effect(() => {
+        formData.construction_year = constructionYearStr ? parseInt(constructionYearStr, 10) : undefined;
+    });
 
     onMount(async () => {
+        if (!propertyId) {
+            error = 'Property ID is required';
+            loading = false;
+            return;
+        }
+
         try {
-            property = await propertyService.getById($page.params.id);
+            property = await propertyService.getById(propertyId);
             formData = {
                 name: property.name,
                 city: property.city,
                 country: property.country,
                 construction_year: property.construction_year
             };
+            constructionYearStr = property.construction_year?.toString() ?? '';
         } catch (err) {
             error = err instanceof Error ? err.message : 'Failed to load property';
         } finally {
@@ -39,12 +59,14 @@
 
     async function handleSubmit(e: Event) {
         e.preventDefault();
+        if (!propertyId) return;
+        
         saving = true;
         error = null;
 
         try {
-            await propertyService.update($page.params.id, formData);
-            goto(`/properties/${$page.params.id}`);
+            await propertyService.update(propertyId, formData);
+            goto(`/properties/${propertyId}`);
         } catch (err) {
             error = err instanceof Error ? err.message : 'Failed to update property';
         } finally {
@@ -57,54 +79,63 @@
     <title>Edit {property?.name ?? 'Property'} | Popati</title>
 </svelte:head>
 
-<div class="mx-auto max-w-2xl space-y-6">
-    <div class="flex items-center gap-2">
-        <Button variant="ghost" size="sm" onclick={() => goto(`/properties/${$page.params.id}`)}>
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-        </Button>
-        <div>
-            <h1 class="text-2xl font-bold text-white">Edit Property</h1>
-            <p class="text-gray-400">Update property details</p>
-        </div>
-    </div>
-
-    {#if loading}
-        <Card>
-            <div class="flex items-center justify-center py-8">
-                <svg class="h-8 w-8 animate-spin text-teal-500" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
+<div class="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
+    <div class="space-y-6">
+        <div class="flex items-center gap-3">
+            <Tooltip text={$t('tooltip.back')} position="bottom">
+                <button
+                    onclick={() => goto(`/properties/${propertyId}`)}
+                    class="p-2 text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 rounded-md transition-colors"
+                    aria-label={$t('tooltip.back')}
+                >
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                </button>
+            </Tooltip>
+            <div>
+                <h1 class="text-2xl font-bold text-neutral-900">Edit Property</h1>
+                <p class="text-neutral-500">Update property details</p>
             </div>
-        </Card>
-    {:else}
-        <Card>
-            <form onsubmit={handleSubmit} class="space-y-4">
-                {#if error}
-                    <div class="rounded-lg bg-red-500/10 p-3 text-sm text-red-400">{error}</div>
-                {/if}
+        </div>
 
-                <Input
-                    label="Property Name"
-                    bind:value={formData.name}
-                    placeholder="e.g., Sunset Apartments"
-                    required
-                />
-
-                <div class="grid gap-4 sm:grid-cols-2">
-                    <Input label="City" bind:value={formData.city} placeholder="e.g., Nairobi" required />
-                    <Select label="Country" bind:value={formData.country} options={countryOptions} placeholder="Select country" required />
+        {#if loading}
+            <Card>
+                <div class="flex items-center justify-center py-8">
+                    <svg class="h-8 w-8 animate-spin text-brand-500" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
                 </div>
+            </Card>
+        {:else}
+            <Card>
+                <form onsubmit={handleSubmit} class="space-y-4">
+                    {#if error}
+                        <div class="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-600">{error}</div>
+                    {/if}
 
-                <Input label="Construction Year" type="number" bind:value={formData.construction_year} placeholder="e.g., 2015" />
+                    <Input
+                        id="property-name"
+                        label="Property Name"
+                        bind:value={formData.name}
+                        placeholder="e.g., Sunset Apartments"
+                        required
+                    />
 
-                <div class="flex justify-end gap-3 pt-4">
-                    <Button variant="secondary" onclick={() => goto(`/properties/${$page.params.id}`)}>Cancel</Button>
-                    <Button type="submit" loading={saving}>Save Changes</Button>
-                </div>
-            </form>
-        </Card>
-    {/if}
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <Input id="city" label="City" bind:value={formData.city} placeholder="e.g., Nairobi" required />
+                        <Select label="Country" bind:value={formData.country} options={countryOptions} placeholder="Select country" required />
+                    </div>
+
+                    <Input id="construction-year" label="Construction Year" type="number" bind:value={constructionYearStr} placeholder="e.g., 2015" />
+
+                    <div class="flex justify-end gap-3 pt-4">
+                        <Button variant="secondary" onclick={() => goto(`/properties/${propertyId}`)}>Cancel</Button>
+                        <Button type="submit" loading={saving}>Save Changes</Button>
+                    </div>
+                </form>
+            </Card>
+        {/if}
+    </div>
 </div>
