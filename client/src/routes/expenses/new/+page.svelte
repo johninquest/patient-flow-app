@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
     import { page } from '$app/state';
-    import { Button, Card, Input, Select } from '$lib/components';
+    import { Button, Card, Input, Select, ErrorDialog } from '$lib/components';
     import Tooltip from '$lib/components/Tooltip.svelte';
     import { expenseService, propertyService, unitService } from '$lib/services';
     import { getCurrencyByCountryCode } from '$lib/types/currency.types';
@@ -27,6 +27,11 @@
     let saving = $state(false);
     let error = $state<string | null>(null);
     let fieldErrors = $state<Record<string, string>>({});
+
+    // ✅ Add ErrorDialog state
+    let errorDialogOpen = $state(false);
+    let errorMessage = $state('');
+    let errorDetails = $state('');
 
     let selectedPropertyId = $state<string>('');
     let preSelectedPropertyId = $state<string>('');
@@ -66,7 +71,6 @@
         try {
             units = await unitService.getByProperty(selectedPropertyId);
         } catch (err) {
-            // Ignore auto-cancellation errors
             if (err instanceof Error && err.message.includes('autocancelled')) {
                 return;
             }
@@ -130,7 +134,10 @@
                 goto('/expenses');
             }
         } catch (err) {
-            error = err instanceof Error ? err.message : 'Failed to record expense';
+            // ✅ Show error dialog instead of inline error
+            errorMessage = err instanceof Error ? err.message : 'Failed to record expense';
+            errorDetails = err instanceof Error ? err.stack || '' : '';
+            errorDialogOpen = true;
         } finally {
             saving = false;
         }
@@ -302,3 +309,10 @@
         {/if}
     </div>
 </div>
+
+<!-- ✅ ErrorDialog moved outside Card, at page level -->
+<ErrorDialog
+    bind:open={errorDialogOpen}
+    message={errorMessage}
+    details={errorDetails}
+/>

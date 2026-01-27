@@ -3,7 +3,7 @@
     import { goto } from '$app/navigation';
     import { page } from '$app/state';
     import { permissions, createPropertyPermissions } from '$lib/stores/permissions';
-    import { getCountryName } from '$lib/types/currency.types';
+    import { getCountryName, getCurrencyByCountryCode } from '$lib/types/currency.types';
     import { 
         Card, 
         Button, 
@@ -393,10 +393,9 @@
     }
 
     function formatCurrency(amount: number): string {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD'
-        }).format(amount);
+        if (!property) return amount.toLocaleString();
+        const currency = getCurrencyByCountryCode(property.country);
+        return `${currency?.symbol ?? currency?.currencyCode ?? ''} ${amount.toLocaleString()}`;
     }
 
     async function loadActivityFeed() {
