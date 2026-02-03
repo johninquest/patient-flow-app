@@ -25,6 +25,7 @@ export class PropertiesService {
         name: data.name,
         city: data.city,
         country: data.country,
+        address: data.address || null, // ✅ Include address
         construction_year: data.construction_year || null,
         owner: userId,
       })
@@ -57,6 +58,7 @@ export class PropertiesService {
         name: properties.name,
         city: properties.city,
         country: properties.country,
+        address: properties.address,
         construction_year: properties.construction_year,
         owner: properties.owner,
         created: properties.created,
@@ -99,11 +101,6 @@ export class PropertiesService {
   }
 
   async update(id: string, data: UpdatePropertyDto, userId: string) {
-    const isOwner = await isPropertyOwner(id, userId);
-    if (!isOwner) {
-      throw new ForbiddenException('Only property owners can update properties');
-    }
-
     const [property] = await db
       .select()
       .from(properties)
@@ -114,6 +111,11 @@ export class PropertiesService {
       throw new NotFoundException('Property not found');
     }
 
+    const isOwner = await isPropertyOwner(id, userId);
+    if (!isOwner) {
+      throw new ForbiddenException('Only the property owner can update it');
+    }
+
     // Get user info
     const [currentUser] = await db
       .select({ name: user.name, email: user.email })
@@ -121,23 +123,29 @@ export class PropertiesService {
       .where(eq(user.id, userId))
       .limit(1);
 
-    // Calculate changes
+    // Calculate changes for activity log
     const changes = this.activityService.calculateChanges(
       property,
       data,
-      ['name', 'city', 'country', 'construction_year'],
+      ['name', 'city', 'country', 'address', 'construction_year'], // ✅ Add address
     );
 
     const [updated] = await db
       .update(properties)
       .set({
-        ...data,
+        name: data.name,
+        city: data.city,
+        country: data.country,
+        address: data.address !== undefined ? data.address : property.address, // ✅ Handle address
+        construction_year: data.construction_year !== undefined 
+          ? data.construction_year 
+          : property.construction_year,
         updated: new Date(),
       })
       .where(eq(properties.id, id))
       .returning();
 
-    // Create activity log only if there were significant changes
+    // Create activity log only if there are changes
     if (changes) {
       await this.activityService.createLog({
         entity_type: 'property',

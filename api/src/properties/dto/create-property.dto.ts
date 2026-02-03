@@ -10,7 +10,11 @@ export class CreatePropertyDto {
   @IsString()
   @Length(3, 3)
   @Matches(/^[A-Z]{3}$/, { message: 'country must be a valid ISO 3166-1 alpha-3 code' })
-  country: string; // Now expects ISO 3166-1 alpha-3 code (e.g., 'CMR')
+  country: string;
+
+  @IsString()
+  @IsOptional()
+  address?: string;
 
   @IsOptional()
   @IsInt()

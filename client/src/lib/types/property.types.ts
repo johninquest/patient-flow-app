@@ -4,26 +4,28 @@ export interface Property {
     id: string;
     name: string;
     city: string;
-    country: string;
+    country: string; // ISO 3166-1 alpha-3 code
+    address?: string;
     construction_year?: number;
     owner: string;
-    created: string;  // Changed from RecordModel timestamps
-    updated: string;  // Changed from RecordModel timestamps
+    created: string;
+    updated: string;
+}
+
+export interface PropertyFormData {
+    name: string;
+    city: string;
+    country: string;
+    address?: string; // ✅ New field
+    construction_year?: number;
 }
 
 export interface PropertyCreate {
     name: string;
     city: string;
     country: string;
-    construction_year?: number;
-    // Note: owner is automatically set by the API from the authenticated user
-}
-
-export interface PropertyUpdate extends Partial<Omit<PropertyCreate, 'owner'>> {}
-
-export interface PropertyFormData {
-    name: string;
-    city: string;
-    country: string;
+    address?: string; // ✅ New field
     construction_year?: number;
 }
+
+export interface PropertyUpdate extends Partial<PropertyCreate> {}

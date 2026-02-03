@@ -21,6 +21,7 @@
         name: '',
         city: '',
         country: '',
+        address: '',
         construction_year: undefined
     });
 
@@ -47,6 +48,7 @@
                 name: property.name,
                 city: property.city,
                 country: property.country,
+                address: property.address || '', // ✅ Load existing address
                 construction_year: property.construction_year
             };
             constructionYearStr = property.construction_year?.toString() ?? '';
@@ -65,7 +67,21 @@
         error = null;
 
         try {
-            await propertyService.update(propertyId, formData);
+            const data: any = {
+                name: formData.name,
+                city: formData.city,
+                country: formData.country,
+            };
+
+            if (formData.address && formData.address.trim()) { // ✅ Include if provided
+                data.address = formData.address.trim();
+            }
+            
+            if (constructionYearStr) {
+                data.construction_year = parseInt(constructionYearStr, 10);
+            }
+
+            await propertyService.update(propertyId, data);
             goto(`/properties/${propertyId}`);
         } catch (err) {
             error = err instanceof Error ? err.message : 'Failed to update property';
@@ -115,17 +131,46 @@
                         <div class="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-600">{error}</div>
                     {/if}
 
-                    <Input
-                        id="property-name"
-                        label="Property Name"
-                        bind:value={formData.name}
-                        placeholder="e.g., Sunset Apartments"
-                        required
+                    <div>
+                        <label for="property-name" class="block text-sm font-medium text-neutral-700 mb-1.5">
+                            Property Name <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            id="property-name"
+                            type="text"
+                            bind:value={formData.name}
+                            placeholder="e.g., Sunset Apartments"
+                            required
+                            class="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                        />
+                    </div>
+
+                    <Input 
+                        id="address" 
+                        label="Address (Optional)" 
+                        bind:value={formData.address} 
+                        placeholder="e.g., 123 Kenyatta Avenue" 
                     />
 
                     <div class="grid gap-4 sm:grid-cols-2">
-                        <Input id="city" label="City" bind:value={formData.city} placeholder="e.g., Nairobi" required />
-                        <Select label="Country" bind:value={formData.country} options={countryOptions} placeholder="Select country" required />
+                        <Input id="city" label="City" bind:value={formData.city} required />
+                        
+                        <div>
+                            <label for="country" class="block text-sm font-medium text-neutral-700 mb-1.5">
+                                Country <span class="text-red-500">*</span>
+                            </label>
+                            <select
+                                id="country"
+                                bind:value={formData.country}
+                                required
+                                class="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                            >
+                                <option value="" disabled>Select a country</option>
+                                {#each countryOptions as option}
+                                    <option value={option.value}>{option.label}</option>
+                                {/each}
+                            </select>
+                        </div>
                     </div>
 
                     <Input id="construction-year" label="Construction Year" type="number" bind:value={constructionYearStr} placeholder="e.g., 2015" />

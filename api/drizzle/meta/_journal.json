@@ -50,6 +50,13 @@
       "when": 1769080006907,
       "tag": "0006_lethal_khan",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1770156583115,
+      "tag": "0007_workable_maginty",
+      "breakpoints": true
     }
   ]
 }

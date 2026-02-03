@@ -12,6 +12,7 @@
         name: '',
         city: '',
         country: '',
+        address: '', // ✅ Add address
         construction_year: undefined
     });
 
@@ -29,8 +30,12 @@
             const data: any = {
                 name: formData.name,
                 city: formData.city,
-                country: formData.country, // Now sends country code
+                country: formData.country,
             };
+            
+            if (formData.address && formData.address.trim()) { // ✅ Include if provided
+                data.address = formData.address.trim();
+            }
             
             if (formData.construction_year !== undefined) {
                 data.construction_year = formData.construction_year;
@@ -72,28 +77,41 @@
                     <div class="rounded-lg bg-red-500/10 p-3 text-sm text-red-400">{error}</div>
                 {/if}
 
-                <Input
-                    id="name"
-                    label="Property Name"
-                    bind:value={formData.name}
-                    placeholder="e.g., Sunset Apartments"
-                    required
+                <div>
+                    <label for="name" class="block text-sm font-medium text-neutral-700 mb-1.5">
+                        Property Name <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                        id="name"
+                        type="text"
+                        bind:value={formData.name}
+                        placeholder="e.g., Sunset Apartments"
+                        required
+                        class="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                    />
+                </div>
+
+                <Input 
+                    id="address" 
+                    label="Address" 
+                    bind:value={formData.address} 
+                    placeholder="e.g., 123 Kenyatta Avenue" 
                 />
 
                 <div class="grid gap-4 sm:grid-cols-2">
                     <Input id="city" label="City" bind:value={formData.city} placeholder="e.g., Nairobi" required />
                     
                     <div>
-                        <label for="country" class="mb-1.5 block text-sm font-medium text-neutral-700">
+                        <label for="country" class="block text-sm font-medium text-neutral-700 mb-1.5">
                             Country <span class="text-red-500">*</span>
                         </label>
                         <select
                             id="country"
                             bind:value={formData.country}
                             required
-                            class="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-neutral-900 transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                            class="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                         >
-                            <option value="" disabled>Select country</option>
+                            <option value="" disabled selected>Select a country</option>
                             {#each countryOptions as option}
                                 <option value={option.value}>{option.label}</option>
                             {/each}
@@ -101,20 +119,25 @@
                     </div>
                 </div>
 
-                <div>
-                    <label for="construction_year" class="mb-1.5 block text-sm font-medium text-neutral-700">
-                        Construction Year
-                        <span class="font-normal text-neutral-500">(optional)</span>
-                    </label>
-                    <input
-                        id="construction_year"
-                        type="number"
-                        min="1900"
-                        max={new Date().getFullYear() + 5}
-                        bind:value={formData.construction_year}
-                        placeholder="e.g., 2020"
-                        class="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-neutral-900 transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
-                    />
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label for="construction_year" class="block text-sm font-medium text-neutral-700 mb-1.5">
+                            Construction Year
+                        </label>
+                        <input
+                            id="construction_year"
+                            type="number"
+                            value={formData.construction_year?.toString() ?? ''}
+                            oninput={(e) => {
+                                const val = (e.target as HTMLInputElement).value;
+                                formData.construction_year = val ? parseInt(val, 10) : undefined;
+                            }}
+                            placeholder="e.g., 2020"
+                            min="1900"
+                            max={new Date().getFullYear() + 5}
+                            class="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                        />
+                    </div>
                 </div>
 
                 <div class="flex justify-end gap-3 pt-4">

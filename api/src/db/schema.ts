@@ -56,6 +56,7 @@ export const properties = pgTable("properties", {
   name: text("name").notNull(),
   city: text("city").notNull(),
   country: varchar("country", { length: 3 }).notNull(), // ISO 3166-1 alpha-3 code
+  address: text("address"),
   construction_year: integer("construction_year"),
   owner: text("owner").notNull().references(() => user.id, { onDelete: "cascade" }),
   created: timestamp("created").defaultNow().notNull(),
