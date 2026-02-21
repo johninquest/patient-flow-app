@@ -10,8 +10,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UserAccessService } from './user-access.service';
-import { AuthGuard } from '../auth/guards/auth.guard';
-import { CurrentUser } from '../auth/decorators/user.decorator';
+import { AuthGuard } from '../../core/auth/guards/auth.guard';
+import { CurrentUser } from '../../core/auth/decorators/user.decorator';
 
 @Controller('user-access')
 @UseGuards(AuthGuard)

@@ -6,8 +6,8 @@ import {
   Param,
 } from '@nestjs/common';
 import { ActivityService } from './activity.service';
-import { AuthGuard } from '../auth/guards/auth.guard';
-import { CurrentUser } from '../auth/decorators/user.decorator';
+import { AuthGuard } from '../../core/auth/guards/auth.guard';
+import { CurrentUser } from '../../core/auth/decorators/user.decorator';
 
 @Controller('activity')
 @UseGuards(AuthGuard)

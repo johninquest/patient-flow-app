@@ -12,8 +12,8 @@ import {
 import { TenantService } from './tenant.service';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
-import { AuthGuard } from '../auth/guards/auth.guard';
-import { CurrentUser } from '../auth/decorators/user.decorator';
+import { AuthGuard } from '../../core/auth/guards/auth.guard';
+import { CurrentUser } from '../../core/auth/decorators/user.decorator';
 
 @Controller('tenants')
 @UseGuards(AuthGuard)

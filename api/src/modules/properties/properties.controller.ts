@@ -9,8 +9,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { PropertiesService } from './properties.service';
-import { AuthGuard } from '../auth/guards/auth.guard';
-import { CurrentUser } from '../auth/decorators/user.decorator';
+import { AuthGuard } from '../../core/auth/guards/auth.guard';
+import { CurrentUser } from '../../core/auth/decorators/user.decorator';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 

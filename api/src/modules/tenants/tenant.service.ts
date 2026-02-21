@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { db } from '../db';
-import { tenants, user } from '../db/schema';
+import { db } from '../../core/db';
+import { tenants, user } from '../../core/db/schema';
 import { eq } from 'drizzle-orm';
-import { canAccessProperty, canEditProperty } from '../common/access.util';
+import { canAccessProperty, canEditProperty } from '../../core/common/access.util';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
 import { ActivityService } from '../activity/activity.service';

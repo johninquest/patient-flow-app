@@ -12,8 +12,8 @@ import {
 import { RentService } from './rent.service';
 import { CreateRentDto } from './dto/create-rent.dto';
 import { UpdateRentDto } from './dto/update-rent.dto';
-import { AuthGuard } from '../auth/guards/auth.guard';
-import { CurrentUser } from '../auth/decorators/user.decorator';
+import { AuthGuard } from '../../core/auth/guards/auth.guard';
+import { CurrentUser } from '../../core/auth/decorators/user.decorator';
 
 @Controller('rent')
 @UseGuards(AuthGuard)

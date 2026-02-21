@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { db } from '../db';
-import { expenses, user } from '../db/schema';
+import { db } from '../../core/db';
+import { expenses, user } from '../../core/db/schema';
 import { eq } from 'drizzle-orm';
-import { canAccessProperty, canEditProperty } from '../common/access.util';
+import { canAccessProperty, canEditProperty } from '../../core/common/access.util';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { ActivityService } from '../activity/activity.service';

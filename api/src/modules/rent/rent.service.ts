@@ -3,10 +3,10 @@ import {
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
-import { db } from '../db';
-import { rent_entries, tenants, user } from '../db/schema';
+import { db } from '../../core/db';
+import { rent_entries, tenants, user } from '../../core/db/schema';
 import { eq } from 'drizzle-orm';
-import { canAccessProperty, canEditProperty } from '../common/access.util';
+import { canAccessProperty, canEditProperty } from '../../core/common/access.util';
 import { CreateRentDto } from './dto/create-rent.dto';
 import { UpdateRentDto } from './dto/update-rent.dto';
 import { ActivityService } from '../activity/activity.service';

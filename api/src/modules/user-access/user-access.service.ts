@@ -4,10 +4,10 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
-import { db } from '../db';
-import { user_access, properties, user } from '../db/schema';
+import { db } from '../../core/db';
+import { user_access, properties, user } from '../../core/db/schema';
 import { eq, and, isNull, sql } from 'drizzle-orm';
-import { isPropertyOwner } from '../common/access.util';
+import { isPropertyOwner } from '../../core/common/access.util';
 import { alias } from 'drizzle-orm/pg-core';
 import { ActivityService } from '../activity/activity.service';
 

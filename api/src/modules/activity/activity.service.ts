@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { db } from '../db';
-import { activities, properties } from '../db/schema';
+import { db } from '../../core/db';
+import { activities, properties } from '../../core/db/schema';
 import { eq, and, desc, gte, sql } from 'drizzle-orm';
-import { canAccessProperty } from '../common/access.util';
+import { canAccessProperty } from '../../core/common/access.util';
 
 export interface ActivityLogEntry {
   id: string;

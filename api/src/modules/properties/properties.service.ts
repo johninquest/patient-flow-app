@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { db } from '../db';
-import { properties, user, user_access } from '../db/schema';
+import { db } from '../../core/db';
+import { properties, user, user_access } from '../../core/db/schema';
 import { eq, or, and } from 'drizzle-orm';
-import { isPropertyOwner } from '../core/common/access.util';
+import { isPropertyOwner } from '../../core/common/access.util';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 import { ActivityService } from '../activity/activity.service';
-
+ 
 @Injectable()
 export class PropertiesService {
   constructor(private readonly activityService: ActivityService) {}
