@@ -9,6 +9,7 @@
     import { paymentMethods } from '$lib/types';
     import { t } from '$lib/i18n';
     import type { RentEntry, Tenant, Property } from '$lib/types';
+    import { formatTimestamp } from '$lib/utils/date';
 
     let rentEntry = $state<RentEntry | null>(null);
     let tenant = $state<Tenant | null>(null);
@@ -205,12 +206,12 @@
 
                     <div>
                         <dt class="text-sm font-medium text-neutral-500">Recorded</dt>
-                        <dd class="mt-1 text-neutral-600 text-sm">{formatDate(rentEntry.created)}</dd>
+                        <dd class="mt-1 text-neutral-600 text-sm">{formatTimestamp(rentEntry.created)}</dd>
                     </div>
 
                     <div>
                         <dt class="text-sm font-medium text-neutral-500">Last Updated</dt>
-                        <dd class="mt-1 text-neutral-600 text-sm">{formatDate(rentEntry.updated)}</dd>
+                        <dd class="mt-1 text-neutral-600 text-sm">{formatTimestamp(rentEntry.updated)}</dd>
                     </div>
                 </dl>
             </Card>

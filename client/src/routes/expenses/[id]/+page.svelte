@@ -9,6 +9,7 @@
     import { expenseCategories } from '$lib/types';
     import { t } from '$lib/i18n';
     import type { Expense, Property, Unit } from '$lib/types';
+    import { formatTimestamp } from '$lib/utils/date';
 
     let expense = $state<Expense | null>(null);
     let property = $state<Property | null>(null);
@@ -197,12 +198,12 @@
 
                     <div>
                         <dt class="text-sm font-medium text-neutral-500">Recorded</dt>
-                        <dd class="mt-1 text-neutral-600 text-sm">{formatDate(expense.created)}</dd>
+                        <dd class="mt-1 text-neutral-600 text-sm">{formatTimestamp(expense.created)}</dd>
                     </div>
 
                     <div>
                         <dt class="text-sm font-medium text-neutral-500">Last Updated</dt>
-                        <dd class="mt-1 text-neutral-600 text-sm">{formatDate(expense.updated)}</dd>
+                        <dd class="mt-1 text-neutral-600 text-sm">{formatTimestamp(expense.updated)}</dd>
                     </div>
                 </dl>
             </Card>

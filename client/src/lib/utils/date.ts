@@ -52,3 +52,18 @@ export function formatAbsoluteTime(date: string | Date): string {
     hour12: true,
   });
 }
+
+/**
+ * Format a timestamp as dd/MM/yyyy HH:mm:ss (24-hour)
+ * Used for audit fields: "Recorded" and "Last Updated"
+ */
+export function formatTimestamp(dateStr: string | Date): string {
+    const d = new Date(dateStr);
+    const dd   = String(d.getDate()).padStart(2, '0');
+    const mm   = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    const hh   = String(d.getHours()).padStart(2, '0');
+    const min  = String(d.getMinutes()).padStart(2, '0');
+    const ss   = String(d.getSeconds()).padStart(2, '0');
+    return `${dd}/${mm}/${yyyy} ${hh}:${min}:${ss}`;
+}

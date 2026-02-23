@@ -145,9 +145,10 @@
     ];
 
     const rentColumns = [
-        { key: 'period', label: 'Period' },
+        { key: 'date', label: 'Date' },
         { key: 'tenant', label: 'Tenant' },
         { key: 'amount', label: 'Amount' },
+        { key: 'period', label: 'Period' },
         { key: 'actions', label: '', class: 'w-24 hidden sm:table-cell' }
     ];
 
@@ -735,19 +736,17 @@
                                     class="hover:bg-neutral-50 cursor-pointer" 
                                     onclick={() => goto(`/rent/${rent.id}`)}
                                 >
-                                    <td class="px-4 py-3 text-sm">
-                                        <span class="block font-medium text-neutral-900">
-                                            {formatRentMonth(rent.rent_month)}
-                                        </span>
-                                        <span class="block text-xs text-neutral-400 mt-0.5">
-                                            Paid {formatPaymentDate(rent.payment_date)}
-                                        </span>
+                                    <td class="px-4 py-3 text-sm text-neutral-600">
+                                        {formatPaymentDate(rent.payment_date)}
                                     </td>
                                     <td class="px-4 py-3 text-sm font-medium text-neutral-900">
                                         {getTenantName(rent.tenant)}
                                     </td>
                                     <td class="px-4 py-3 text-sm text-neutral-600">
                                         {formatCurrency(rent.amount, property.country)}
+                                    </td>
+                                    <td class="px-4 py-3 text-sm font-medium text-neutral-900">
+                                        {formatRentMonth(rent.rent_month)}
                                     </td>
                                     <td class="hidden sm:table-cell px-4 py-3 text-right" onclick={(e) => e.stopPropagation()}>
                                         <Button variant="ghost" size="sm" onclick={() => goto(`/rent/${rent.id}`)}>View</Button>
