@@ -138,17 +138,17 @@
     ];
 
     const expenseColumns = [
-        { key: 'date', label: 'Date' },
         { key: 'category', label: 'Category' },
         { key: 'amount', label: 'Amount' },
-        { key: 'actions', label: '', class: 'w-24' }
+        { key: 'date', label: 'Date' },
+        { key: 'actions', label: '', class: 'w-24 hidden sm:table-cell' }
     ]; // ✅ Removed description column
 
     const rentColumns = [
-        { key: 'date', label: 'Date' },
         { key: 'tenant', label: 'Tenant' },
         { key: 'amount', label: 'Amount' },
-        { key: 'actions', label: '', class: 'w-24' } // Always include this
+        { key: 'period', label: 'Period' },
+        { key: 'actions', label: '', class: 'w-24 hidden sm:table-cell' }
     ];
 
     const expenseCategories = [
@@ -374,6 +374,14 @@
         return unit.unit_name ? `${unit.unit_number} - ${unit.unit_name}` : unit.unit_number;
     }
 
+    function getTenantName(tenantId: string | undefined): string {
+        if (!tenantId) return '—';
+        const tenant = tenants.find((t) => t.id === tenantId);
+        if (!tenant) return '—';
+        if (tenant.preferred_name) return tenant.preferred_name;
+        return `${tenant.first_name} ${tenant.last_name}`;
+    }
+
     // Rent functions
     function openRentModal(rent?: RentEntry) {
         editingRent = rent ?? null;
@@ -393,10 +401,24 @@
         rentModalOpen = true;
     }
 
-    function formatCurrency(amount: number): string {
-        if (!property) return amount.toLocaleString();
-        const currency = getCurrencyByCountryCode(property.country);
-        return `${currency?.symbol ?? currency?.currencyCode ?? ''} ${amount.toLocaleString()}`;
+    function formatCurrency(amount: number, country?: string): string {
+        const c = country ?? property?.country ?? '';
+        const currency = getCurrencyByCountryCode(c);
+        const symbol = currency?.symbol ?? currency?.currencyCode ?? '';
+        return `${symbol} ${amount.toLocaleString()}`;
+    }
+
+    function formatRentMonth(rentMonth: string): string {
+        if (!rentMonth) return '—';
+        const [year, month] = rentMonth.split('-');
+        const date = new Date(parseInt(year), parseInt(month) - 1, 1);
+        return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    }
+
+    function formatPaymentDate(dateStr: string): string {
+        if (!dateStr) return '—';
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('en-GB'); // dd/MM/yyyy
     }
 
     async function loadActivityFeed() {
@@ -709,24 +731,27 @@
                     {:else}
                         <Table columns={rentColumns}>
                             {#each rentEntries as rent}
-                                <tr class="hover:bg-neutral-50 cursor-pointer" onclick={() => goto(`/rent/${rent.id}`)}>
-                                    <td class="px-4 py-3 text-sm text-neutral-900">
-                                        {new Date(rent.payment_date).toLocaleDateString()}
+                                <tr 
+                                    class="hover:bg-neutral-50 cursor-pointer" 
+                                    onclick={() => goto(`/rent/${rent.id}`)}
+                                >
+                                    <td class="px-4 py-3 text-sm font-medium text-neutral-900">
+                                        {getTenantName(rent.tenant)}
                                     </td>
                                     <td class="px-4 py-3 text-sm text-neutral-600">
-                                        {#if rent.tenant_first_name && rent.tenant_last_name}
-                                            {rent.tenant_first_name} {rent.tenant_last_name}
-                                        {:else}
-                                            —
-                                        {/if}
+                                        {formatCurrency(rent.amount, property.country)}
                                     </td>
-                                    <td class="px-4 py-3 text-sm text-green-600 font-medium">
-                                        {formatCurrency(rent.amount)}
+                                    <td class="px-4 py-3 text-sm">
+                                        <span class="block font-medium text-neutral-900">
+                                            {formatRentMonth(rent.rent_month)}
+                                        </span>
+                                        <span class="block text-xs text-neutral-400 mt-0.5">
+                                            Paid {formatPaymentDate(rent.payment_date)}
+                                        </span>
                                     </td>
-                                    <td class="px-4 py-3 text-sm text-right" onclick={(e) => e.stopPropagation()}>
-                                        <Button variant="ghost" size="sm" onclick={() => goto(`/rent/${rent.id}`)}>
-                                            View
-                                        </Button>
+                                    <!-- View button: hidden on mobile, visible on larger screens -->
+                                    <td class="hidden sm:table-cell px-4 py-3 text-right" onclick={(e) => e.stopPropagation()}>
+                                        <Button variant="ghost" size="sm" onclick={() => goto(`/rent/${rent.id}`)}>View</Button>
                                     </td>
                                 </tr>
                             {/each}
@@ -768,22 +793,19 @@
                         <Table columns={expenseColumns}>
                             {#each expenses as expense}
                                 <tr class="hover:bg-neutral-50 cursor-pointer" onclick={() => goto(`/expenses/${expense.id}`)}>
-                                    <td class="px-4 py-3 text-sm text-neutral-900">
-                                        {new Date(expense.expense_date).toLocaleDateString()}
-                                    </td>
-                                    <td class="px-4 py-3 text-sm text-neutral-600">
-                                        <span class="px-2 py-1 text-xs rounded-full bg-neutral-100 text-neutral-700">
-                                            {expenseCategories.find(c => c.value === expense.category)?.label ?? expense.category}
+                                    <td class="px-4 py-3 text-sm font-medium text-neutral-900">
+                                        <span class="inline-flex rounded-full px-2 py-1 text-xs font-medium bg-neutral-100 text-neutral-700 capitalize">
+                                            {expense.category}
                                         </span>
                                     </td>
-                                    <!-- ✅ REMOVED description cell here -->
-                                    <td class="px-4 py-3 text-sm text-red-600 font-medium">
-                                        {formatCurrency(expense.amount)}
+                                    <td class="px-4 py-3 text-sm text-neutral-600">
+                                        {formatCurrency(expense.amount, property.country)}
                                     </td>
-                                    <td class="px-4 py-3 text-sm text-right" onclick={(e) => e.stopPropagation()}>
-                                        <Button variant="ghost" size="sm" onclick={() => goto(`/expenses/${expense.id}`)}>
-                                            View
-                                        </Button>
+                                    <td class="px-4 py-3 text-sm text-neutral-600">
+                                        {formatPaymentDate(expense.expense_date)}
+                                    </td>
+                                    <td class="hidden sm:table-cell px-4 py-3 text-right" onclick={(e) => e.stopPropagation()}>
+                                        <Button variant="ghost" size="sm" onclick={() => goto(`/expenses/${expense.id}`)}>View</Button>
                                     </td>
                                 </tr>
                             {/each}
