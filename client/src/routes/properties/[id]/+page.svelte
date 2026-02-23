@@ -14,11 +14,12 @@
         ConfirmDialog,
         Select,
         PermissionButton, 
-        Tooltip
+        Tooltip,
+        ActivityFeed,
+        GrantAccessModal,
+        AccessList,
+        PropertyOverview
     } from '$lib/components';
-    import ActivityFeed from '$lib/components/ActivityFeed.svelte';
-    import GrantAccessModal from '$lib/components/GrantAccessModal.svelte';
-    import AccessList from '$lib/components/AccessList.svelte';
     import { 
         propertyService, 
         unitService, 
@@ -563,10 +564,11 @@
 
             <!-- Tab Content -->
             {#if activeTab === 'overview'}
-                <!-- Stats placeholder — replaced when analytics endpoint is ready -->
-                <Card>
-                    <p class="text-sm text-gray-500 text-center py-8">Property stats coming soon.</p>
-                </Card>
+                <PropertyOverview
+                    {propertyId}
+                    country={property.country}
+                    {activeTab}
+                />
 
             {:else if activeTab === 'setup'}
                 <!-- Units Section -->

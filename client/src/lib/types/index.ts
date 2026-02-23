@@ -6,3 +6,4 @@ export * from './expense.types';
 export * from './user-access.types';
 export * from './activity.types';
 export * from './auth.types';
+export * from './analytics.types';
