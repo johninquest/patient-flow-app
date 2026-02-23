@@ -10,20 +10,22 @@ import { RentModule } from './modules/rent/rent.module';
 import { ExpensesModule } from './modules/expenses/expenses.module';
 import { UserAccessModule } from './modules/user-access/user-access.module';
 import { ActivityModule } from './modules/activity/activity.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    AuthModule,
-    PropertiesModule,
-    UnitsModule,
-    TenantModule,
-    RentModule,
-    ExpensesModule,
-    UserAccessModule,
-    ActivityModule,
-  ],
-  controllers: [AppController],
-  providers: [AppService],
+    imports: [
+        ConfigModule.forRoot({ isGlobal: true }),
+        AuthModule,
+        PropertiesModule,
+        UnitsModule,
+        TenantModule,
+        RentModule,
+        ExpensesModule,
+        UserAccessModule,
+        ActivityModule,
+        AnalyticsModule,
+    ],
+    controllers: [AppController],
+    providers: [AppService],
 })
 export class AppModule {}

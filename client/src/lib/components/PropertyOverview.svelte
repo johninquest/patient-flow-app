@@ -175,9 +175,10 @@
                             <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-neutral-500">
                                 Expenses
                             </th>
-                            <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-neutral-500">
+                            <!-- Net column hidden for now -->
+                            <!-- <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-neutral-500">
                                 Net
-                            </th>
+                            </th> -->
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-neutral-100 bg-white">
@@ -191,9 +192,10 @@
                                 <td class="px-4 py-2.5 text-sm text-right {row.expenses > 0 ? 'text-red-500 font-medium' : 'text-neutral-400'}">
                                     {row.expenses > 0 ? formatCurrency(row.expenses) : '—'}
                                 </td>
-                                <td class="px-4 py-2.5 text-sm text-right font-medium {row.net > 0 ? 'text-green-600' : row.net < 0 ? 'text-red-500' : 'text-neutral-400'}">
+                                <!-- Net column hidden for now -->
+                                <!-- <td class="px-4 py-2.5 text-sm text-right font-medium {row.net > 0 ? 'text-green-600' : row.net < 0 ? 'text-red-500' : 'text-neutral-400'}">
                                     {row.collected > 0 || row.expenses > 0 ? formatCurrency(row.net) : '—'}
-                                </td>
+                                </td> -->
                             </tr>
                         {/each}
                     </tbody>
