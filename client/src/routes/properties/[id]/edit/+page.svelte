@@ -147,7 +147,7 @@
 
                     <Input 
                         id="address" 
-                        label="Address (Optional)" 
+                        label="Address" 
                         bind:value={formData.address} 
                         placeholder="e.g., 123 Kenyatta Avenue" 
                     />
