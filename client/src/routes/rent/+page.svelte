@@ -6,6 +6,7 @@
     import { rentService, propertyService } from '$lib/services';
     import { getCurrencyByCountryCode } from '$lib/types/currency.types';
     import { t } from '$lib/i18n';
+    import { formatDate } from '$lib/utils/date';
     import type { RentEntry, Property } from '$lib/types';
 
     let rentEntries = $state<RentEntry[]>([]);
@@ -15,20 +16,11 @@
     let error = $state<string | null>(null);
     let initialized = $state(false);
 
-    const paymentMethods = [
-        { value: 'cash', label: 'Cash' },
-        { value: 'bank_transfer', label: 'Bank Transfer' },
-        { value: 'check', label: 'Check' },
-        { value: 'mobile_money', label: 'Mobile Money' },
-        { value: 'other', label: 'Other' }
-    ];
-
     const columns = [
+        { key: 'payment_date', label: 'Payment Date' },
         { key: 'tenant', label: 'Tenant' },
         { key: 'amount', label: 'Amount' },
-        { key: 'payment_method', label: 'Method' },
         { key: 'rent_month', label: 'Rent Month' },
-        { key: 'payment_date', label: 'Payment Date' },
         { key: 'actions', label: '', class: 'w-24' }
     ];
 
@@ -80,14 +72,10 @@
         return `${currency?.currencyCode ?? ''} ${amount.toLocaleString()}`;
     }
 
-    function formatDate(dateStr: string): string {
-        return new Date(dateStr).toLocaleDateString();
-    }
-
     function formatRentMonth(rentMonth: string): string {
         const [year, month] = rentMonth.split('-');
         const date = new Date(parseInt(year), parseInt(month) - 1);
-        return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
     }
 
     // Use onchange handler instead of $effect to avoid race conditions
@@ -96,10 +84,7 @@
         loadRentEntries();
     }
 
-    function getPaymentMethodLabel(method: string): string {
-        const pm = paymentMethods.find(m => m.value === method);
-        return pm?.label ?? method;
-    }
+
 </script>
 
 <svelte:head>
@@ -181,6 +166,9 @@
             <Table {columns}>
                 {#each rentEntries as entry}
                     <tr class="hover:bg-neutral-50">
+                        <td class="px-4 py-3 text-sm text-neutral-600">
+                            {formatDate(entry.payment_date)}
+                        </td>
                         <td class="px-4 py-3 text-sm font-medium text-neutral-900">
                             {#if entry.tenant_first_name && entry.tenant_last_name}
                                 {entry.tenant_first_name} {entry.tenant_last_name}
@@ -192,23 +180,15 @@
                             {formatAmount(entry.amount)}
                         </td>
                         <td class="px-4 py-3 text-sm text-neutral-600">
-                            <span class="px-2 py-1 text-xs rounded-full bg-neutral-100 text-neutral-700">
-                                {getPaymentMethodLabel(entry.payment_method)}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3 text-sm text-neutral-600">
                             {formatRentMonth(entry.rent_month)}
-                        </td>
-                        <td class="px-4 py-3 text-sm text-neutral-600">
-                            {formatDate(entry.payment_date)}
                         </td>
                         <td class="px-4 py-3 text-right">
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                onclick={() => goto(`/rent/${entry.id}/edit`)}
+                                onclick={() => goto(`/rent/${entry.id}`)}
                             >
-                                Edit
+                                View
                             </Button>
                         </td>
                     </tr>

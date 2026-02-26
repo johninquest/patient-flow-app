@@ -122,7 +122,7 @@
     function formatRentMonth(rentMonth: string): string {
         const [year, month] = rentMonth.split('-');
         const date = new Date(parseInt(year), parseInt(month) - 1);
-        return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
     }
 
     function getUnitDisplay(): string {

@@ -67,3 +67,14 @@ export function formatTimestamp(dateStr: string | Date): string {
     const ss   = String(d.getSeconds()).padStart(2, '0');
     return `${dd}/${mm}/${yyyy} ${hh}:${min}:${ss}`;
 }
+
+/**
+ * Format a date as dd/MM/yyyy
+ */
+export function formatDate(dateStr: string | Date): string {
+    const d = new Date(dateStr);
+    const dd   = String(d.getDate()).padStart(2, '0');
+    const mm   = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+}
