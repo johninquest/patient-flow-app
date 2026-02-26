@@ -7,6 +7,7 @@
     import { tenantService, unitService, rentService, propertyService } from '$lib/services';
     import { getCurrencyByCountryCode } from '$lib/types/currency.types';
     import { t } from '$lib/i18n';
+    import { formatDate } from '$lib/utils/date';
     import type { Tenant, Unit, RentEntry, Property } from '$lib/types';
 
     let tenant = $state<Tenant | null>(null);
@@ -115,26 +116,27 @@
         isEditing = false;
     }
 
-    function formatDate(dateStr: string): string {
-        return new Date(dateStr).toLocaleDateString();
-    }
-
-    function formatRentMonth(rentMonth: string): string {
-        const [year, month] = rentMonth.split('-');
-        const date = new Date(parseInt(year), parseInt(month) - 1);
-        return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-    }
-
     function getUnitDisplay(): string {
         if (!tenant?.unit) return 'No unit assigned';
         const unit = units.find((u) => u.id === tenant?.unit);
-        return unit ? `${unit.unit_number}${unit.unit_name ? ` - ${unit.unit_name}` : ''}` : 'No unit assigned';
+        if (!unit) return 'Unknown unit';
+        return `Unit ${unit.unit_number}${unit.unit_name ? ` - ${unit.unit_name}` : ''}`;
     }
 
     function formatCurrency(amount: number): string {
         if (!property) return amount.toLocaleString();
         const currency = getCurrencyByCountryCode(property.country);
         return `${currency?.symbol ?? currency?.currencyCode ?? ''} ${amount.toLocaleString()}`;
+    }
+
+    function formatRentMonth(rentMonth: string): string {
+        const [year, month] = rentMonth.split('-');
+        const monthMap: Record<string, string> = {
+            '01': 'Jan', '02': 'Feb', '03': 'Mar', '04': 'Apr',
+            '05': 'May', '06': 'Jun', '07': 'Jul', '08': 'Aug',
+            '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dec'
+        };
+        return `${monthMap[month] ?? month} ${year}`;
     }
 </script>
 
@@ -283,17 +285,17 @@
                         <table class="min-w-full divide-y divide-neutral-200">
                             <thead class="bg-neutral-50">
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase">Month</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase">Amount</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase">Payment Date</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase">Period</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase">Amount</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-neutral-100 bg-white">
-                                {#each rentHistory as entry}
+                                {#each rentHistory.slice().sort((a, b) => new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime()) as entry}
                                     <tr class="hover:bg-neutral-50">
+                                        <td class="px-4 py-3 text-sm text-neutral-600">{formatDate(entry.payment_date)}</td>
                                         <td class="px-4 py-3 text-sm text-neutral-900">{formatRentMonth(entry.rent_month)}</td>
                                         <td class="px-4 py-3 text-sm text-green-600 font-medium">{formatCurrency(entry.amount)}</td>
-                                        <td class="px-4 py-3 text-sm text-neutral-600">{formatDate(entry.payment_date)}</td>
                                     </tr>
                                 {/each}
                             </tbody>
