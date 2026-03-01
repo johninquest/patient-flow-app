@@ -3,6 +3,9 @@ import { defineConfig } from 'vite';
 import { readFileSync } from 'fs';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 
+// Generate a revision hash based on build time
+const buildRevision = Date.now().toString(36);
+
 export default defineConfig({
     plugins: [
         sveltekit(),
@@ -41,11 +44,17 @@ export default defineConfig({
             },
             workbox: {
                 navigateFallback: '/',
-                additionalManifestEntries: [{ url: '/', revision: null }],
+                additionalManifestEntries: [{ url: '/', revision: buildRevision }],
                 globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff,woff2}'],
+                globIgnores: ['**/version.json'],
                 skipWaiting: true,
-                clientsClaim: true, 
+                clientsClaim: true,
+                cleanupOutdatedCaches: true,
                 runtimeCaching: [
+                    {
+                        urlPattern: ({ url }) => url.pathname === '/version.json',
+                        handler: 'NetworkOnly',
+                    },
                     {
                         urlPattern: ({ url }) => url.origin === 'https://api.popaty.com',
                         handler: 'NetworkFirst',
@@ -53,7 +62,7 @@ export default defineConfig({
                             cacheName: 'api-cache',
                             expiration: {
                                 maxEntries: 100,
-                                maxAgeSeconds: 60 * 60 * 24
+                                maxAgeSeconds: 60 * 5 // 5 minutes, not 24 hours
                             },
                             cacheableResponse: {
                                 statuses: [0, 200]

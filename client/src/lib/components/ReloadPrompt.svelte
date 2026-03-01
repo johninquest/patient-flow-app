@@ -1,103 +1,71 @@
 <script lang="ts">
     import { useRegisterSW } from 'virtual:pwa-register/svelte';
     import { browser } from '$app/environment';
-    import Button from './Button.svelte';
 
     const {
         needRefresh,
         offlineReady,
         updateServiceWorker
     } = useRegisterSW({
-        immediate: true, // ✅ Register immediately
+        immediate: true,
         onRegistered(registration: ServiceWorkerRegistration | undefined) {
             console.log('[PWA] Service worker registered');
             if (registration) {
-                // Check for updates more frequently - every 5 minutes
+                // Check for updates every 2 minutes
                 setInterval(() => {
-                    console.log('[PWA] Checking for updates...');
+                    console.log('[PWA] Periodic update check...');
                     registration.update();
-                }, 5 * 60 * 1000);
+                }, 2 * 60 * 1000);
                 
-                // Also check on visibility change (when app comes to foreground)
                 if (browser) {
+                    // Check when app comes to foreground (critical for mobile PWAs)
                     document.addEventListener('visibilitychange', () => {
                         if (document.visibilityState === 'visible') {
                             console.log('[PWA] App visible, checking for updates...');
                             registration.update();
                         }
                     });
+
+                    // Check on network reconnect
+                    window.addEventListener('online', () => {
+                        console.log('[PWA] Back online, checking for updates...');
+                        registration.update();
+                    });
+
+                    // Check on window focus
+                    window.addEventListener('focus', () => {
+                        console.log('[PWA] Window focused, checking for updates...');
+                        registration.update();
+                    });
                 }
             }
         },
         onRegisterError(error: Error) {
-            console.error('[PWA] Service worker registration error:', error);
+            console.error('[PWA] SW registration error:', error);
         },
         onNeedRefresh() {
-            console.log('[PWA] New content available, refresh needed');
+            console.log('[PWA] New content available - auto-reloading');
         },
         onOfflineReady() {
             console.log('[PWA] App ready to work offline');
         }
     });
 
-    function close() {
-        $needRefresh = false;
-    }
-
-    // Auto-reload after a short delay if user doesn't interact (optional, more aggressive)
+    // Auto-reload immediately when update is available - no user prompt
     $effect(() => {
         if ($needRefresh && browser) {
-            // Give user 30 seconds to see the prompt, then auto-update
+            // Small delay to let SW activate, then force reload
             const timeout = setTimeout(() => {
-                console.log('[PWA] Auto-updating after timeout...');
+                console.log('[PWA] Auto-updating now...');
                 updateServiceWorker(true);
-            }, 30000);
-            
+            }, 1500);
+
             return () => clearTimeout(timeout);
         }
     });
 </script>
 
-{#if $needRefresh}
-    <div class="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 z-50">
-        <div class="bg-white border border-neutral-200 rounded-lg shadow-lg p-4">
-            <div class="flex items-start gap-3">
-                <div class="shrink-0">
-                    <svg class="h-6 w-6 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-neutral-900">
-                        New version available
-                    </p>
-                    <p class="text-sm text-neutral-500 mt-1">
-                        Tap reload to update to the latest version.
-                    </p>
-                    <div class="flex gap-2 mt-3">
-                        <Button size="sm" onclick={() => updateServiceWorker(true)}>
-                            Reload Now
-                        </Button>
-                        <Button size="sm" variant="ghost" onclick={close}>
-                            Later
-                        </Button>
-                    </div>
-                </div>
-                <button
-                    onclick={close}
-                    class="shrink-0 text-neutral-400 hover:text-neutral-500"
-                    aria-label="Close"
-                >
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </div>
-{/if}
-
+<!-- No UI needed - updates happen automatically -->
 {#if $offlineReady}
-    <!-- Optional: show offline ready notification briefly -->
+    <!-- Optional: brief offline ready indicator -->
 {/if}
