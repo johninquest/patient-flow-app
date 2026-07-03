@@ -1,11 +1,11 @@
-# Development Dockerfile for API (Bun)
-FROM oven/bun:1-alpine
+# Development Dockerfile for API (Node.js)
+FROM node:24-alpine
 
 WORKDIR /app
 
 # Install dependencies
-COPY package.json bun.lockb* ./
-RUN bun install
+COPY package.json package-lock.json* ./
+RUN npm install
 
 # Copy source code
 COPY . .
@@ -14,4 +14,4 @@ COPY . .
 EXPOSE 3000
 
 # Run in development mode with hot reload
-CMD ["bun", "run", "start:dev"]
+CMD ["npm", "run", "start:dev"]
