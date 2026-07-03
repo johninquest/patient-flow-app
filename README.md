@@ -60,37 +60,48 @@ npm run dev
 
 ### Option 2: Docker Development
 
-**Start all services:**
+**Start database only (recommended for local development):**
 ```bash
-docker-compose up
+docker-compose up -d
+```
+Then run API and client locally with hot-reload.
+
+**Start full stack for testing:**
+```bash
+docker-compose -f docker-compose.test.yml up
 ```
 
 **Start in background:**
 ```bash
-docker-compose up -d
+docker-compose -f docker-compose.test.yml up -d
 ```
 
 **View logs:**
 ```bash
-docker-compose logs -f
+docker-compose -f docker-compose.test.yml logs -f
 ```
 
 **Stop services:**
 ```bash
-docker-compose down
+docker-compose -f docker-compose.test.yml down
 ```
 
 **Access containers:**
 ```bash
 # API shell
-docker-compose exec api sh
+docker-compose -f docker-compose.test.yml exec api sh
 
 # Client shell
-docker-compose exec client sh
+docker-compose -f docker-compose.test.yml exec client sh
 
 # Run migrations
-docker-compose exec api npm run migration:run
+docker-compose -f docker-compose.test.yml exec api npm run db:migrate
 ```
+
+**Docker Compose Files:**
+- `docker-compose.yml` - Database only (for local development)
+- `docker-compose.test.yml` - Full stack (API + Client + Database)
+- `docker-compose.prod.yml` - Production deployment
 
 ## Deployment
 
