@@ -1,0 +1,81 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Une erreur s'est produite",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "actions": "Actions",
+    "confirm": "Confirmer",
+    "back": "Retour"
+  },
+  "auth": {
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "register": "S'inscrire",
+    "email": "Email",
+    "password": "Mot de passe",
+    "name": "Nom",
+    "loginTitle": "Connectez-vous à votre compte",
+    "registerTitle": "Créer un nouveau compte",
+    "noAccount": "Vous n'avez pas de compte ?",
+    "hasAccount": "Vous avez déjà un compte ?"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "patients": "Patients",
+    "encounters": "Consultations",
+    "tasks": "Tâches",
+    "settings": "Paramètres"
+  },
+  "patients": {
+    "title": "Patients",
+    "create": "Nouveau patient",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "dateOfBirth": "Date de naissance",
+    "phone": "Téléphone",
+    "email": "Email",
+    "address": "Adresse",
+    "notes": "Notes"
+  },
+  "encounters": {
+    "title": "Consultations",
+    "create": "Nouvelle consultation",
+    "status": "Statut",
+    "scheduledTime": "Heure prévue",
+    "assignedTo": "Assigné à",
+    "notes": "Notes",
+    "statuses": {
+      "scheduled": "Planifié",
+      "checked_in": "Arrivé",
+      "in_progress": "En cours",
+      "completed": "Terminé",
+      "cancelled": "Annulé"
+    }
+  },
+  "tasks": {
+    "title": "Tâches",
+    "create": "Nouvelle tâche",
+    "title_field": "Titre",
+    "description": "Description",
+    "status": "Statut",
+    "priority": "Priorité",
+    "assignedTo": "Assigné à",
+    "dueDate": "Date d'échéance",
+    "statuses": {
+      "todo": "À faire",
+      "in_progress": "En cours",
+      "done": "Terminé"
+    },
+    "priorities": {
+      "low": "Faible",
+      "medium": "Moyenne",
+      "high": "Élevée"
+    }
+  }
+}

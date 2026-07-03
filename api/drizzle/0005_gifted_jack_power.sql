@@ -1,1 +1,0 @@
-ALTER TABLE "rent_entries" ADD COLUMN "payment_method" text DEFAULT 'cash' NOT NULL;

@@ -1,10 +1,12 @@
 import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
-  // Enable CORS for the SvelteKit client with credentials
+  // Enable CORS for the React client with credentials
   const allowedOrigins = process.env.CLIENT_URL?.split(',').map(url => url.trim()) || ['http://localhost:5173'];
   
   // Only log CORS config in development
@@ -19,6 +21,24 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
   });
+
+  // Global validation pipe for DTOs
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    transform: true,
+  }));
+
+  // Swagger/OpenAPI documentation setup
+  const config = new DocumentBuilder()
+    .setTitle('Patient Flow API')
+    .setDescription('Healthcare workflow orchestration API')
+    .setVersion('1.0')
+    .addCookieAuth('session_token')
+    .build();
+  
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
 
   // Configure logging based on environment
   if (process.env.NODE_ENV === 'production') {

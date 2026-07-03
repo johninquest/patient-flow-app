@@ -1,14 +1,14 @@
-# Popaty - Property Management System
+# Patient Flow - Patient Workflow Orchestration System
 
-A fullstack application designed to help DIY landlords and property managers track rental income and property expenses across their portfolio of properties.
+A lightweight patient workflow orchestration system for clinics and healthcare organizations. Tracks patients through care stages, assigns tasks to staff, and ensures clear handoffs across the care journey.
 
 ## Features
 
-- 🏠 Property & Unit Management
-- 👥 Tenant Management
-- 💰 Rent Payment Tracking
-- 📊 Expense Management
-- 🔐 User Access Control
+- 👥 Patient Management
+- 🏥 Encounter Workflow Tracking
+- ✅ Task Assignment & Management
+- 📊 Audit Logging
+- 🔐 Role-Based Access Control
 - 🌍 Multi-language Support (i18n)
 
 ## Tech Stack
@@ -20,18 +20,18 @@ A fullstack application designed to help DIY landlords and property managers tra
 - **Authentication:** Better Auth
 
 ### Frontend (Client)
-- **Framework:** SvelteKit
-- **Styling:** Tailwind CSS
+- **Framework:** React 19
+- **Styling:** Tailwind CSS v4
 - **Language:** TypeScript
-- **Build Tool:** Vite
+- **Build Tool:** Vite 7
 
 ## Project Structure
 
 ```
-popaty/
+patient-flow-app/
 ├── api/          # NestJS backend API
-├── client/       # SvelteKit frontend
-└── plans/        # Project documentation
+├── client/       # React frontend
+└── requirements/ # Project documentation
 ```
 
 ## Getting Started

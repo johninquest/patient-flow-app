@@ -1,5 +1,9 @@
-import { pgTable, text, timestamp, boolean, integer, decimal, uuid, unique, check, jsonb, index, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, uuid, jsonb, index } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+
+// ============================================================================
+// AUTH TABLES (Better Auth managed)
+// ============================================================================
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -7,6 +11,7 @@ export const user = pgTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("emailVerified").default(false),
   image: text("image"),
+  role: text("role").default("front_desk").notNull(), // 'admin' | 'provider' | 'clinical_staff' | 'front_desk'
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });
@@ -51,104 +56,76 @@ export const verification = pgTable("verification", {
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });
 
-export const properties = pgTable("properties", {
-  id: uuid("id").primaryKey().default(sql`uuidv7()`),
-  name: text("name").notNull(),
-  city: text("city").notNull(),
-  country: varchar("country", { length: 3 }).notNull(), // ISO 3166-1 alpha-3 code
-  address: text("address"),
-  construction_year: integer("construction_year"),
-  owner: text("owner").notNull().references(() => user.id, { onDelete: "cascade" }),
-  created: timestamp("created").defaultNow().notNull(),
-  updated: timestamp("updated").defaultNow().notNull(),
-});
+// ============================================================================
+// PATIENT FLOW TABLES
+// ============================================================================
 
-export const units = pgTable("units", {
-  id: uuid("id").primaryKey().default(sql`uuidv7()`),
-  unit_name: text("unit_name"),
-  unit_number: text("unit_number").notNull(),
-  property: uuid("property").notNull().references(() => properties.id, { onDelete: "cascade" }),
-  created: timestamp("created").defaultNow().notNull(),
-  updated: timestamp("updated").defaultNow().notNull(),
-});
-
-export const tenants = pgTable("tenants", {
+export const patients = pgTable("patients", {
   id: uuid("id").primaryKey().default(sql`uuidv7()`),
   first_name: text("first_name").notNull(),
   last_name: text("last_name").notNull(),
-  preferred_name: text("preferred_name"),
-  id_card_number: text("id_card_number"),
-  phone: text("phone").notNull(),
-  property: uuid("property").notNull().references(() => properties.id, { onDelete: "cascade" }),
-  unit: uuid("unit").references(() => units.id, { onDelete: "set null" }),
-  active: boolean("active").default(true).notNull(),
-  created: timestamp("created").defaultNow().notNull(),
-  updated: timestamp("updated").defaultNow().notNull(),
-});
-
-export const rent_entries = pgTable("rent_entries", {
-  id: uuid("id").primaryKey().default(sql`uuidv7()`),
-  tenant: uuid("tenant").notNull().references(() => tenants.id, { onDelete: "cascade" }),
-  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
-  payment_date: timestamp("payment_date").notNull(),
-  rent_month: text("rent_month").notNull(), // Format: "YYYY-MM"
-  payment_method: text("payment_method").notNull().default('cash'), // 'cash', 'bank_transfer', 'mobile_money'
+  date_of_birth: timestamp("date_of_birth"),
+  phone: text("phone"),
+  email: text("email"),
+  address: text("address"),
   notes: text("notes"),
-  recorded_by: text("recorded_by").notNull().references(() => user.id),
-  created: timestamp("created").defaultNow().notNull(),
-  updated: timestamp("updated").defaultNow().notNull(),
-});
-
-export const expenses = pgTable("expenses", {
-  id: uuid("id").primaryKey().default(sql`uuidv7()`),
-  property: uuid("property").notNull().references(() => properties.id, { onDelete: "cascade" }),
-  unit: uuid("unit").references(() => units.id, { onDelete: "set null" }),
-  category: text("category").notNull(), // 'maintenance', 'utilities', etc.
-  description: text("description").notNull(),
-  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
-  expense_date: timestamp("expense_date").notNull(),
-  vendor: text("vendor"),
-  recorded_by: text("recorded_by").notNull().references(() => user.id),
-  created: timestamp("created").defaultNow().notNull(),
-  updated: timestamp("updated").defaultNow().notNull(),
-});
-
-export const user_access = pgTable("user_access", {
-  id: uuid("id").primaryKey().default(sql`uuidv7()`),
-  user: text("user").references(() => user.id, { onDelete: "cascade" }),
-  pending_email: text("pending_email"),
-  property: uuid("property").notNull().references(() => properties.id, { onDelete: "cascade" }),
-  role: text("role").notNull(),
-  granted_by: text("granted_by").notNull().references(() => user.id),
-  created: timestamp("created").defaultNow().notNull(),
-  updated: timestamp("updated").defaultNow().notNull(),
+  created_at: timestamp("created_at").defaultNow().notNull(),
+  updated_at: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => ({
-  // Check constraint: either user or pending_email must be set (not both, not neither)
-  userOrPendingCheck: check(
-    "user_access_user_or_pending",
-    sql`(${table.user} IS NOT NULL AND ${table.pending_email} IS NULL) OR (${table.user} IS NULL AND ${table.pending_email} IS NOT NULL)`
-  ),
-  // Partial unique index: only enforce uniqueness for pending invitations
-  pendingEmailPropertyIdx: index("user_access_pending_email_property_idx")
-    .on(table.pending_email, table.property)
-    .where(sql`${table.pending_email} IS NOT NULL`),
+  nameIdx: index("patients_name_idx").on(table.last_name, table.first_name),
+  emailIdx: index("patients_email_idx").on(table.email),
 }));
 
-export const activities = pgTable("activities", {
+export const encounters = pgTable("encounters", {
   id: uuid("id").primaryKey().default(sql`uuidv7()`),
-  entity_type: text("entity_type").notNull(), // 'property', 'tenant', 'unit', 'rent_entry', 'expense', 'user_access'
-  entity_id: uuid("entity_id").notNull(), // ID of the affected record
-  action: text("action").notNull(), // 'create', 'update', 'delete'
-  changes: jsonb("changes"), // { field: { from: value, to: value } }
-  user_id: text("user_id").notNull().references(() => user.id),
-  user_name: text("user_name"), // Denormalized for faster queries
-  user_email: text("user_email"), // Denormalized for faster queries
-  property_id: uuid("property_id").references(() => properties.id, { onDelete: "cascade" }), // Which property this affects
+  patient_id: uuid("patient_id").notNull().references(() => patients.id, { onDelete: "cascade" }),
+  status: text("status").notNull(), // 'scheduled' | 'checked_in' | 'in_progress' | 'completed' | 'cancelled'
+  assigned_to: uuid("assigned_to").references(() => user.id, { onDelete: "set null" }),
+  scheduled_time: timestamp("scheduled_time"),
+  notes: text("notes"),
+  version: integer("version").default(0).notNull(),
+  created_at: timestamp("created_at").defaultNow().notNull(),
+  updated_at: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  patientIdx: index("encounters_patient_idx").on(table.patient_id),
+  statusIdx: index("encounters_status_idx").on(table.status),
+  assignedToIdx: index("encounters_assigned_to_idx").on(table.assigned_to),
+  scheduledTimeIdx: index("encounters_scheduled_time_idx").on(table.scheduled_time),
+}));
+
+export const tasks = pgTable("tasks", {
+  id: uuid("id").primaryKey().default(sql`uuidv7()`),
+  encounter_id: uuid("encounter_id").notNull().references(() => encounters.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  status: text("status").notNull(), // 'todo' | 'in_progress' | 'done'
+  priority: text("priority").notNull(), // 'low' | 'medium' | 'high'
+  assigned_user_id: uuid("assigned_user_id").references(() => user.id, { onDelete: "set null" }),
+  assigned_role: text("assigned_role"),
+  blocking: boolean("blocking").default(false).notNull(),
+  due_at: timestamp("due_at"),
+  created_at: timestamp("created_at").defaultNow().notNull(),
+  updated_at: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  encounterIdx: index("tasks_encounter_idx").on(table.encounter_id),
+  statusIdx: index("tasks_status_idx").on(table.status),
+  assignedUserIdIdx: index("tasks_assigned_user_idx").on(table.assigned_user_id),
+  priorityIdx: index("tasks_priority_idx").on(table.priority),
+}));
+
+export const audit_log = pgTable("audit_log", {
+  id: uuid("id").primaryKey().default(sql`uuidv7()`),
+  actor_user_id: uuid("actor_user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  actor_role: text("actor_role").notNull(),
+  action: text("action").notNull(), // e.g., 'patient.created', 'encounter.status_changed'
+  resource_type: text("resource_type").notNull(), // e.g., 'patient', 'encounter', 'task'
+  resource_id: uuid("resource_id").notNull(),
+  diff: jsonb("diff"), // { field: { from: value, to: value } }
+  ip_address: text("ip_address"),
   created_at: timestamp("created_at").defaultNow().notNull(),
 }, (table) => ({
-  // Indexes for fast querying
-  propertyIdx: index("activities_property_idx").on(table.property_id),
-  entityIdx: index("activities_entity_idx").on(table.entity_type, table.entity_id),
-  userIdx: index("activities_user_idx").on(table.user_id),
-  createdAtIdx: index("activities_created_at_idx").on(table.created_at),
+  actorIdx: index("audit_log_actor_idx").on(table.actor_user_id),
+  resourceIdx: index("audit_log_resource_idx").on(table.resource_type, table.resource_id),
+  actionIdx: index("audit_log_action_idx").on(table.action),
+  createdAtIdx: index("audit_log_created_at_idx").on(table.created_at),
 }));

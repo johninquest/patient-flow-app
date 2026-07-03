@@ -3,7 +3,7 @@ services:
     build:
       context: ./api
       dockerfile: Dockerfile.prod
-    container_name: popaty-api
+    container_name: patient-flow-api
     restart: unless-stopped
     environment:
       - NODE_ENV=production
@@ -17,11 +17,11 @@ services:
     labels:
       - "traefik.enable=true"
       # API routing
-      - "traefik.http.routers.popaty-api.entrypoints=websecure"
-      - "traefik.http.routers.popaty-api.rule=Host(`api.popaty.com`)"
-      - "traefik.http.routers.popaty-api.tls=true"
-      - "traefik.http.routers.popaty-api.tls.certresolver=letsencrypt"
-      - "traefik.http.services.popaty-api.loadbalancer.server.port=3000"
+      - "traefik.http.routers.patient-flow-api.entrypoints=websecure"
+      - "traefik.http.routers.patient-flow-api.rule=Host(`api.patientflow.app`)"
+      - "traefik.http.routers.patient-flow-api.tls=true"
+      - "traefik.http.routers.patient-flow-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.patient-flow-api.loadbalancer.server.port=3000"
     networks:
       - proxy
 
@@ -29,7 +29,7 @@ services:
     build:
       context: ./client
       dockerfile: Dockerfile.prod
-    container_name: popaty-client
+    container_name: patient-flow-client
     restart: unless-stopped
     environment:
       - NODE_ENV=production
@@ -37,12 +37,12 @@ services:
       - HOST=0.0.0.0
     labels:
       - "traefik.enable=true"
-      # Client routing - using app.popaty.com
-      - "traefik.http.routers.popaty-client.entrypoints=websecure"
-      - "traefik.http.routers.popaty-client.rule=Host(`app2.popaty.com`)"
-      - "traefik.http.routers.popaty-client.tls=true"
-      - "traefik.http.routers.popaty-client.tls.certresolver=letsencrypt"
-      - "traefik.http.services.popaty-client.loadbalancer.server.port=3000"
+      # Client routing
+      - "traefik.http.routers.patient-flow-client.entrypoints=websecure"
+      - "traefik.http.routers.patient-flow-client.rule=Host(`app.patientflow.app`)"
+      - "traefik.http.routers.patient-flow-client.tls=true"
+      - "traefik.http.routers.patient-flow-client.tls.certresolver=letsencrypt"
+      - "traefik.http.services.patient-flow-client.loadbalancer.server.port=3000"
     depends_on:
       - api
     networks:

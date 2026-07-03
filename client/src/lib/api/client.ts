@@ -1,45 +1,58 @@
-import { API_URL } from '$lib/config';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-interface RequestOptions extends RequestInit {
-  params?: Record<string, string>;
-}
+class ApiClient {
+  private baseUrl: string;
 
-async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-  const { params, ...fetchOptions } = options;
-  
-  let url = `${API_URL}${endpoint}`;
-  if (params) {
-    const searchParams = new URLSearchParams(params);
-    url += `?${searchParams}`;
+  constructor(baseUrl: string) {
+    this.baseUrl = baseUrl;
   }
 
-  const response = await fetch(url, {
-    ...fetchOptions,
-    credentials: 'include', // Important: Send cookies for Better Auth
-    headers: {
-      'Content-Type': 'application/json',
-      ...fetchOptions.headers,
-    },
-  });
+  private async request<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<T> {
+    const url = `${this.baseUrl}${endpoint}`;
+    
+    const config: RequestInit = {
+      ...options,
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+    };
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Request failed' }));
-    throw new Error(error.message || `HTTP ${response.status}: ${response.statusText}`);
+    const response = await fetch(url, config);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'An error occurred' }));
+      throw new Error(error.message || `HTTP ${response.status}`);
+    }
+
+    return response.json();
   }
 
-  return response.json();
+  async get<T>(endpoint: string): Promise<T> {
+    return this.request<T>(endpoint, { method: 'GET' });
+  }
+
+  async post<T>(endpoint: string, data?: any): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async put<T>(endpoint: string, data?: any): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async delete<T>(endpoint: string): Promise<T> {
+    return this.request<T>(endpoint, { method: 'DELETE' });
+  }
 }
 
-export const api = {
-  get: <T>(endpoint: string, options?: RequestOptions) => 
-    request<T>(endpoint, { ...options, method: 'GET' }),
-  
-  post: <T>(endpoint: string, data?: any, options?: RequestOptions) => 
-    request<T>(endpoint, { ...options, method: 'POST', body: JSON.stringify(data) }),
-  
-  put: <T>(endpoint: string, data?: any, options?: RequestOptions) => 
-    request<T>(endpoint, { ...options, method: 'PUT', body: JSON.stringify(data) }),
-  
-  delete: <T>(endpoint: string, options?: RequestOptions) => 
-    request<T>(endpoint, { ...options, method: 'DELETE' }),
-};
+export const api = new ApiClient(API_BASE_URL);

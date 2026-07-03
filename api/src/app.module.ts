@@ -3,27 +3,19 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './core/auth/auth.module';
-import { PropertiesModule } from './modules/properties/properties.module';
-import { UnitsModule } from './modules/units/units.module';
-import { TenantModule } from './modules/tenants/tenant.module';
-import { RentModule } from './modules/rent/rent.module';
-import { ExpensesModule } from './modules/expenses/expenses.module';
-import { UserAccessModule } from './modules/user-access/user-access.module';
-import { ActivityModule } from './modules/activity/activity.module';
-import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { AuditModule } from './modules/audit/audit.module';
+import { PatientsModule } from './modules/patients/patients.module';
+import { EncountersModule } from './modules/encounters/encounters.module';
+import { TasksModule } from './modules/tasks/tasks.module';
 
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true }),
         AuthModule,
-        PropertiesModule,
-        UnitsModule,
-        TenantModule,
-        RentModule,
-        ExpensesModule,
-        UserAccessModule,
-        ActivityModule,
-        AnalyticsModule,
+        AuditModule,
+        PatientsModule,
+        EncountersModule,
+        TasksModule,
     ],
     controllers: [AppController],
     providers: [AppService],

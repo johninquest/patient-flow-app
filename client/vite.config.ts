@@ -1,84 +1,16 @@
-import { sveltekit } from '@sveltejs/kit/vite';
-import { defineConfig } from 'vite';
-import { readFileSync } from 'fs';
-import { SvelteKitPWA } from '@vite-pwa/sveltekit';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
-// Generate a revision hash based on build time
-const buildRevision = Date.now().toString(36);
-
+// https://vitejs.dev/config/
 export default defineConfig({
-    plugins: [
-        sveltekit(),
-        SvelteKitPWA({
-            srcDir: 'src',
-            mode: 'production',
-            strategies: 'generateSW',
-            registerType: 'autoUpdate',
-            scope: '/',
-            base: '/',
-            selfDestroying: process.env.SELF_DESTROYING_SW === 'true',
-            manifest: {
-                id: '/',
-                short_name: 'Popaty',
-                name: 'Popaty',
-                start_url: '/',
-                scope: '/',
-                display: 'standalone',
-                theme_color: '#8c6a3a',
-                background_color: '#F9FAFB',
-                description: 'Property rent and expense management app',
-                icons: [
-                    {
-                        src: '/icon-192.png',
-                        sizes: '192x192',
-                        type: 'image/png', 
-                        purpose: 'maskable any'
-                    },
-                    {
-                        src: '/icon-512.png',
-                        sizes: '512x512',
-                        type: 'image/png', 
-                        purpose: 'maskable any'
-                    }
-                ]
-            },
-            workbox: {
-                navigateFallback: '/',
-                additionalManifestEntries: [{ url: '/', revision: buildRevision }],
-                globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff,woff2}'],
-                globIgnores: ['**/version.json'],
-                skipWaiting: true,
-                clientsClaim: true,
-                cleanupOutdatedCaches: true,
-                runtimeCaching: [
-                    {
-                        urlPattern: ({ url }) => url.pathname === '/version.json',
-                        handler: 'NetworkOnly',
-                    },
-                    {
-                        urlPattern: ({ url }) => url.origin === 'https://api.popaty.com',
-                        handler: 'NetworkFirst',
-                        options: {
-                            cacheName: 'api-cache',
-                            expiration: {
-                                maxEntries: 100,
-                                maxAgeSeconds: 60 * 5 // 5 minutes, not 24 hours
-                            },
-                            cacheableResponse: {
-                                statuses: [0, 200]
-                            }
-                        }
-                    }
-                ]
-            },
-            devOptions: {
-                enabled: true,
-                suppressWarnings: true,
-                type: 'module'
-            },
-            kit: {
-                includeVersionFile: true
-            }
-        })
-    ]
-});
+  plugins: [react()],
+  server: {
+    port: 5173,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
+    },
+  },
+})

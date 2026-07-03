@@ -1,0 +1,81 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "actions": "Actions",
+    "confirm": "Confirm",
+    "back": "Back"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "loginTitle": "Sign in to your account",
+    "registerTitle": "Create a new account",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "patients": "Patients",
+    "encounters": "Encounters",
+    "tasks": "Tasks",
+    "settings": "Settings"
+  },
+  "patients": {
+    "title": "Patients",
+    "create": "New Patient",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "dateOfBirth": "Date of Birth",
+    "phone": "Phone",
+    "email": "Email",
+    "address": "Address",
+    "notes": "Notes"
+  },
+  "encounters": {
+    "title": "Encounters",
+    "create": "New Encounter",
+    "status": "Status",
+    "scheduledTime": "Scheduled Time",
+    "assignedTo": "Assigned To",
+    "notes": "Notes",
+    "statuses": {
+      "scheduled": "Scheduled",
+      "checked_in": "Checked In",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    }
+  },
+  "tasks": {
+    "title": "Tasks",
+    "create": "New Task",
+    "title_field": "Title",
+    "description": "Description",
+    "status": "Status",
+    "priority": "Priority",
+    "assignedTo": "Assigned To",
+    "dueDate": "Due Date",
+    "statuses": {
+      "todo": "To Do",
+      "in_progress": "In Progress",
+      "done": "Done"
+    },
+    "priorities": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    }
+  }
+}
