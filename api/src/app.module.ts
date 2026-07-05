@@ -7,17 +7,19 @@ import { AuditModule } from './modules/audit/audit.module';
 import { PatientsModule } from './modules/patients/patients.module';
 import { EncountersModule } from './modules/encounters/encounters.module';
 import { TasksModule } from './modules/tasks/tasks.module';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
-    imports: [
-        ConfigModule.forRoot({ isGlobal: true }),
-        AuthModule,
-        AuditModule,
-        PatientsModule,
-        EncountersModule,
-        TasksModule,
-    ],
-    controllers: [AppController],
-    providers: [AppService],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    AuthModule,
+    AuditModule,
+    PatientsModule,
+    EncountersModule,
+    TasksModule,
+    UserModule,
+  ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

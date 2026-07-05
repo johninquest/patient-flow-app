@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { db } from '../../core/db';
 import { encounters, patients } from '../../core/db/schema';
 import { eq, and } from 'drizzle-orm';
@@ -30,7 +35,9 @@ export class EncountersService {
       .limit(1);
 
     if (!patient) {
-      throw new NotFoundException(`Patient with ID ${dto.patient_id} not found`);
+      throw new NotFoundException(
+        `Patient with ID ${dto.patient_id} not found`,
+      );
     }
 
     const [encounter] = await db
@@ -39,7 +46,9 @@ export class EncountersService {
         patient_id: dto.patient_id,
         status: 'scheduled',
         assigned_to: dto.assigned_to || null,
-        scheduled_time: dto.scheduled_time ? new Date(dto.scheduled_time) : null,
+        scheduled_time: dto.scheduled_time
+          ? new Date(dto.scheduled_time)
+          : null,
         notes: dto.notes || null,
       })
       .returning();
@@ -73,7 +82,12 @@ export class EncountersService {
     return encounter;
   }
 
-  async update(id: string, dto: UpdateEncounterDto, userId: string, userRole: string) {
+  async update(
+    id: string,
+    dto: UpdateEncounterDto,
+    userId: string,
+    userRole: string,
+  ) {
     const existing = await this.findOne(id);
 
     // Validate status transition if status is being updated
@@ -90,18 +104,23 @@ export class EncountersService {
       }
 
       // Check ownership lock: only assigned user or admin can change status
-      if (existing.assigned_to && existing.assigned_to !== userId && userRole !== 'admin') {
+      if (
+        existing.assigned_to &&
+        existing.assigned_to !== userId &&
+        userRole !== 'admin'
+      ) {
         throw new ForbiddenException(
           'Only the assigned staff member or admin can update this encounter',
         );
       }
     }
 
-    const diff = this.auditService.calculateDiff(
-      existing,
-      dto,
-      ['status', 'assigned_to', 'scheduled_time', 'notes'],
-    );
+    const diff = this.auditService.calculateDiff(existing, dto, [
+      'status',
+      'assigned_to',
+      'scheduled_time',
+      'notes',
+    ]);
 
     // Optimistic locking: increment version
     const [updated] = await db
@@ -109,16 +128,22 @@ export class EncountersService {
       .set({
         status: dto.status ?? existing.status,
         assigned_to: dto.assigned_to ?? existing.assigned_to,
-        scheduled_time: dto.scheduled_time ? new Date(dto.scheduled_time) : existing.scheduled_time,
+        scheduled_time: dto.scheduled_time
+          ? new Date(dto.scheduled_time)
+          : existing.scheduled_time,
         notes: dto.notes ?? existing.notes,
         version: existing.version + 1,
         updated_at: new Date(),
       })
-      .where(and(eq(encounters.id, id), eq(encounters.version, existing.version)))
+      .where(
+        and(eq(encounters.id, id), eq(encounters.version, existing.version)),
+      )
       .returning();
 
     if (!updated) {
-      throw new BadRequestException('Encounter was modified by another user. Please refresh and try again.');
+      throw new BadRequestException(
+        'Encounter was modified by another user. Please refresh and try again.',
+      );
     }
 
     if (diff) {

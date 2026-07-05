@@ -53,21 +53,32 @@ export class PatientsService {
     return patient;
   }
 
-  async update(id: string, dto: UpdatePatientDto, userId: string, userRole: string) {
+  async update(
+    id: string,
+    dto: UpdatePatientDto,
+    userId: string,
+    userRole: string,
+  ) {
     const existing = await this.findOne(id);
 
-    const diff = this.auditService.calculateDiff(
-      existing,
-      dto,
-      ['first_name', 'last_name', 'date_of_birth', 'phone', 'email', 'address', 'notes'],
-    );
+    const diff = this.auditService.calculateDiff(existing, dto, [
+      'first_name',
+      'last_name',
+      'date_of_birth',
+      'phone',
+      'email',
+      'address',
+      'notes',
+    ]);
 
     const [updated] = await db
       .update(patients)
       .set({
         first_name: dto.first_name ?? existing.first_name,
         last_name: dto.last_name ?? existing.last_name,
-        date_of_birth: dto.date_of_birth ? new Date(dto.date_of_birth) : existing.date_of_birth,
+        date_of_birth: dto.date_of_birth
+          ? new Date(dto.date_of_birth)
+          : existing.date_of_birth,
         phone: dto.phone ?? existing.phone,
         email: dto.email ?? existing.email,
         address: dto.address ?? existing.address,

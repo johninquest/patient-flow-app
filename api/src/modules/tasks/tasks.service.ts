@@ -19,7 +19,9 @@ export class TasksService {
       .limit(1);
 
     if (!encounter) {
-      throw new NotFoundException(`Encounter with ID ${dto.encounter_id} not found`);
+      throw new NotFoundException(
+        `Encounter with ID ${dto.encounter_id} not found`,
+      );
     }
 
     const [task] = await db
@@ -53,10 +55,7 @@ export class TasksService {
   }
 
   async findByEncounter(encounterId: string) {
-    return db
-      .select()
-      .from(tasks)
-      .where(eq(tasks.encounter_id, encounterId));
+    return db.select().from(tasks).where(eq(tasks.encounter_id, encounterId));
   }
 
   async findOne(id: string) {
@@ -73,14 +72,24 @@ export class TasksService {
     return task;
   }
 
-  async update(id: string, dto: UpdateTaskDto, userId: string, userRole: string) {
+  async update(
+    id: string,
+    dto: UpdateTaskDto,
+    userId: string,
+    userRole: string,
+  ) {
     const existing = await this.findOne(id);
 
-    const diff = this.auditService.calculateDiff(
-      existing,
-      dto,
-      ['title', 'description', 'status', 'priority', 'assigned_user_id', 'assigned_role', 'blocking', 'due_at'],
-    );
+    const diff = this.auditService.calculateDiff(existing, dto, [
+      'title',
+      'description',
+      'status',
+      'priority',
+      'assigned_user_id',
+      'assigned_role',
+      'blocking',
+      'due_at',
+    ]);
 
     const [updated] = await db
       .update(tasks)

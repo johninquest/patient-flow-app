@@ -1,4 +1,11 @@
-import { IsString, IsOptional, IsBoolean, IsDateString, IsUUID, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsBoolean,
+  IsDateString,
+  IsUUID,
+  IsEnum,
+} from 'class-validator';
 
 export class UpdateTaskDto {
   @IsOptional()

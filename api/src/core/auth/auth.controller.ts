@@ -7,7 +7,7 @@ import { getAuth } from './auth';
 export class AuthController {
   private handler = toNodeHandler(getAuth());
 
-  @All('*path')  // Changed from '*' to '*path'
+  @All('*path') // Changed from '*' to '*path'
   async handleAuth(@Req() req: Request, @Res() res: Response) {
     // Remove or comment out in production as per previous discussion
     if (process.env.NODE_ENV !== 'production') {

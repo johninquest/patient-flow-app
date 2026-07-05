@@ -1,7 +1,7 @@
-import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db } from "../db";
-import * as schema from "../db/schema";
+import { betterAuth } from 'better-auth';
+import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { db } from '../db';
+import * as schema from '../db/schema';
 
 let authInstance: ReturnType<typeof betterAuth> | null = null;
 
@@ -11,19 +11,21 @@ let authInstance: ReturnType<typeof betterAuth> | null = null;
  */
 export function getAuth() {
   if (!authInstance) {
-    const allowedOrigins = process.env.CLIENT_URL?.split(',').map(url => url.trim()) || ['http://localhost:5173'];
+    const allowedOrigins = process.env.CLIENT_URL?.split(',').map((url) =>
+      url.trim(),
+    ) || ['http://localhost:5173'];
     const isProduction = process.env.NODE_ENV === 'production';
-    
+
     /* console.log('=== Better Auth Configuration ===');
     console.log('NODE_ENV:', process.env.NODE_ENV);
     console.log('isProduction:', isProduction);
     console.log('CLIENT_URL env variable:', process.env.CLIENT_URL);
     console.log('Trusted origins:', allowedOrigins);
     console.log('================================='); */
-    
+
     authInstance = betterAuth({
       database: drizzleAdapter(db, {
-        provider: "pg",
+        provider: 'pg',
         schema: {
           user: schema.user,
           session: schema.session,
@@ -32,8 +34,8 @@ export function getAuth() {
         },
       }),
       secret: process.env.AUTH_SECRET,
-      baseURL: process.env.API_URL || "http://localhost:3000",
-      basePath: "/api/auth",
+      baseURL: process.env.API_URL || 'http://localhost:3000',
+      basePath: '/api/auth',
       emailAndPassword: {
         enabled: true,
       },
@@ -49,12 +51,12 @@ export function getAuth() {
         ...(isProduction && {
           crossSubDomainCookies: {
             enabled: true,
-            domain: ".popaty.com",
+            domain: '.popaty.com',
           },
         }),
         defaultCookieAttributes: {
-          sameSite: "lax",
-          secure: isProduction,  // ✅ false for localhost (HTTP), true for production (HTTPS)
+          sameSite: 'lax',
+          secure: isProduction, // ✅ false for localhost (HTTP), true for production (HTTPS)
           httpOnly: true,
         },
       },

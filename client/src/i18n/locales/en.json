@@ -30,6 +30,7 @@
     "patients": "Patients",
     "encounters": "Encounters",
     "tasks": "Tasks",
+    "staff": "Staff",
     "settings": "Settings"
   },
   "patients": {
@@ -76,6 +77,24 @@
       "low": "Low",
       "medium": "Medium",
       "high": "High"
+    }
+  },
+  "staff": {
+    "title": "Staff Management",
+    "description": "Manage user roles and professional titles for your clinic staff.",
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "title_field": "Title",
+    "joined": "Joined",
+    "you": "You",
+    "noTitle": "— None —",
+    "cannotDemoteSelf": "You cannot demote yourself from admin",
+    "roles": {
+      "admin": "Admin",
+      "provider": "Provider",
+      "clinical_staff": "Clinical Staff",
+      "front_desk": "Front Desk"
     }
   }
 }

@@ -30,6 +30,7 @@
     "patients": "Patients",
     "encounters": "Consultations",
     "tasks": "Tâches",
+    "staff": "Personnel",
     "settings": "Paramètres"
   },
   "patients": {
@@ -76,6 +77,24 @@
       "low": "Faible",
       "medium": "Moyenne",
       "high": "Élevée"
+    }
+  },
+  "staff": {
+    "title": "Gestion du personnel",
+    "description": "Gérez les rôles et titres professionnels du personnel de votre clinique.",
+    "name": "Nom",
+    "email": "Email",
+    "role": "Rôle",
+    "title_field": "Titre",
+    "joined": "Inscrit le",
+    "you": "Vous",
+    "noTitle": "— Aucun —",
+    "cannotDemoteSelf": "Vous ne pouvez pas vous rétrograder du rôle d'administrateur",
+    "roles": {
+      "admin": "Administrateur",
+      "provider": "Prestataire",
+      "clinical_staff": "Personnel clinique",
+      "front_desk": "Accueil"
     }
   }
 }

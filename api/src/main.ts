@@ -2,19 +2,22 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { seedAdmin } from './core/auth/seed';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   // Enable CORS for the React client with credentials
-  const allowedOrigins = process.env.CLIENT_URL?.split(',').map(url => url.trim()) || ['http://localhost:5173'];
-  
+  const allowedOrigins = process.env.CLIENT_URL?.split(',').map((url) =>
+    url.trim(),
+  ) || ['http://localhost:5173'];
+
   // Only log CORS config in development
   if (process.env.NODE_ENV !== 'production') {
     console.log('Allowed CORS origins:', allowedOrigins);
     console.log('CLIENT_URL env variable:', process.env.CLIENT_URL);
   }
-  
+
   app.enableCors({
     origin: allowedOrigins,
     credentials: true,
@@ -23,11 +26,13 @@ async function bootstrap() {
   });
 
   // Global validation pipe for DTOs
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
 
   // Swagger/OpenAPI documentation setup
   const config = new DocumentBuilder()
@@ -36,7 +41,7 @@ async function bootstrap() {
     .setVersion('1.0')
     .addCookieAuth('session_token')
     .build();
-  
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
@@ -46,7 +51,10 @@ async function bootstrap() {
     app.useLogger(['error', 'warn']);
   }
   // In development: use default (all log levels)
-  
+
+  // Seed admin user from ADMIN_EMAIL env var (idempotent)
+  await seedAdmin();
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

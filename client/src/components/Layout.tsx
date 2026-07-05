@@ -22,6 +22,7 @@ export default function Layout() {
     { path: '/patients', label: t('nav.patients') },
     { path: '/encounters', label: t('nav.encounters') },
     { path: '/tasks', label: t('nav.tasks') },
+    ...(user?.role === 'admin' ? [{ path: '/staff', label: t('nav.staff') }] : []),
   ];
 
   return (

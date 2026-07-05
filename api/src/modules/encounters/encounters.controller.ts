@@ -48,8 +48,14 @@ export class EncountersController {
   @Put(':id')
   @ApiOperation({ summary: 'Update an encounter' })
   @ApiResponse({ status: 200, description: 'Encounter updated successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid status transition or optimistic lock conflict' })
-  @ApiResponse({ status: 403, description: 'Not authorized to update this encounter' })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid status transition or optimistic lock conflict',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Not authorized to update this encounter',
+  })
   @ApiResponse({ status: 404, description: 'Encounter not found' })
   update(
     @Param('id') id: string,
