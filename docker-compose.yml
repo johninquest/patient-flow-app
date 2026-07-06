@@ -10,7 +10,7 @@ services:
       - POSTGRES_PASSWORD=patientflow_dev_password
       - POSTGRES_DB=patientflow
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
     networks:
       - patient-flow-dev
 

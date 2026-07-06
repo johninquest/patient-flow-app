@@ -2,9 +2,10 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import * as schema from './schema';
 import { config } from 'dotenv';
+import { resolve } from 'path';
 
-// Load environment variables
-config();
+// Load environment variables from project root
+config({ path: resolve(__dirname, '../../../.env') });
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
