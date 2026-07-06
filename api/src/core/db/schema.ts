@@ -22,6 +22,7 @@ export const user = pgTable('user', {
   image: text('image'),
   role: text('role').default('front_desk').notNull(), // 'admin' | 'provider' | 'clinical_staff' | 'front_desk'
   title: text('title'), // Professional designation: Doctor, Nurse, Medical Physicist, etc.
+  status: text('status').default('active').notNull(), // 'active' | 'suspended'
   createdAt: timestamp('createdAt').defaultNow().notNull(),
   updatedAt: timestamp('updatedAt').defaultNow().notNull(),
 });

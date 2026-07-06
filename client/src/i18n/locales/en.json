@@ -23,7 +23,11 @@
     "loginTitle": "Sign in to your account",
     "registerTitle": "Create a new account",
     "noAccount": "Don't have an account?",
-    "hasAccount": "Already have an account?"
+    "hasAccount": "Already have an account?",
+    "signInWithGoogle": "Sign in with Google",
+    "orDivider": "or",
+    "contactAdmin": "Need an account? Contact your administrator.",
+    "accountSuspended": "Your account has been suspended. Please contact your administrator."
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -90,6 +94,17 @@
     "you": "You",
     "noTitle": "— None —",
     "cannotDemoteSelf": "You cannot demote yourself from admin",
+    "createStaff": "New Staff",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "passwordMismatch": "Passwords do not match",
+    "status": "Status",
+    "active": "Active",
+    "suspended": "Suspended",
+    "suspend": "Suspend",
+    "activate": "Activate",
+    "confirmSuspend": "Suspend User Account",
+    "suspendWarning": "This user will be immediately logged out and will not be able to access the system until reactivated.",
     "roles": {
       "admin": "Admin",
       "provider": "Provider",

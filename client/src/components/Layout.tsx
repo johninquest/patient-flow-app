@@ -1,6 +1,7 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
+import BottomTabBar from './BottomTabBar';
 
 export default function Layout() {
   const { t, i18n } = useTranslation();
@@ -71,9 +72,11 @@ export default function Layout() {
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 pb-20 sm:pb-6">
         <Outlet />
       </main>
+
+      <BottomTabBar />
     </div>
   );
 }

@@ -40,6 +40,7 @@ export function getAuth(): any {
       basePath: '/api/auth',
       emailAndPassword: {
         enabled: true,
+        disableSignUp: true, // Admin creates accounts; self-registration disabled
       },
       socialProviders: {
         google: {

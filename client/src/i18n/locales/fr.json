@@ -23,7 +23,11 @@
     "loginTitle": "Connectez-vous à votre compte",
     "registerTitle": "Créer un nouveau compte",
     "noAccount": "Vous n'avez pas de compte ?",
-    "hasAccount": "Vous avez déjà un compte ?"
+    "hasAccount": "Vous avez déjà un compte ?",
+    "signInWithGoogle": "Se connecter avec Google",
+    "orDivider": "ou",
+    "contactAdmin": "Besoin d'un compte ? Contactez votre administrateur.",
+    "accountSuspended": "Votre compte a été suspendu. Veuillez contacter votre administrateur."
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -90,6 +94,17 @@
     "you": "Vous",
     "noTitle": "— Aucun —",
     "cannotDemoteSelf": "Vous ne pouvez pas vous rétrograder du rôle d'administrateur",
+    "createStaff": "Nouveau personnel",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "passwordMismatch": "Les mots de passe ne correspondent pas",
+    "status": "Statut",
+    "active": "Actif",
+    "suspended": "Suspendu",
+    "suspend": "Suspendre",
+    "activate": "Activer",
+    "confirmSuspend": "Suspendre le compte utilisateur",
+    "suspendWarning": "Cet utilisateur sera immédiatement déconnecté et ne pourra pas accéder au système jusqu'à sa réactivation.",
     "roles": {
       "admin": "Administrateur",
       "provider": "Prestataire",

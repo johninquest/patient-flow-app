@@ -1,7 +1,9 @@
-import { Controller, Get, Patch, Param, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserStatusDto } from './dto/update-user-status.dto';
 import { AuthGuard } from '../../core/auth/guards/auth.guard';
 import { RolesGuard } from '../../core/auth/guards/roles.guard';
 import { Roles } from '../../core/auth/decorators/roles.decorator';
@@ -12,6 +14,21 @@ import { CurrentUser } from '../../core/auth/decorators/user.decorator';
 @UseGuards(AuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Post()
+  @UseGuards(RolesGuard)
+  @Roles('admin')
+  @ApiOperation({ summary: 'Create a new user account (admin only)' })
+  @ApiResponse({ status: 201, description: 'User created successfully' })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({ status: 403, description: 'Forbidden — admin role required' })
+  @ApiResponse({ status: 409, description: 'Email already exists' })
+  create(
+    @Body() dto: CreateUserDto,
+    @CurrentUser() actor: any,
+  ) {
+    return this.userService.createUser(dto, actor.id, actor.role);
+  }
 
   @Get()
   @UseGuards(RolesGuard)
@@ -51,5 +68,24 @@ export class UserController {
     @CurrentUser() actor: any,
   ) {
     return this.userService.updateRole(id, dto, actor.id, actor.role);
+  }
+
+  @Patch(':id/status')
+  @UseGuards(RolesGuard)
+  @Roles('admin')
+  @ApiOperation({ summary: 'Update user status (active/suspended) (admin only)' })
+  @ApiResponse({ status: 200, description: 'User status updated successfully' })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden — cannot suspend self or last active admin',
+  })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  updateStatus(
+    @Param('id') id: string,
+    @Body() dto: UpdateUserStatusDto,
+    @CurrentUser() actor: any,
+  ) {
+    return this.userService.updateStatus(id, dto, actor.id, actor.role);
   }
 }
