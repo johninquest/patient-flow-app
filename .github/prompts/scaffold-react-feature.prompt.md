@@ -22,25 +22,36 @@ Generate the following files:
 - Default export (for lazy loading)
 - `useTranslation()` for all strings
 - TanStack Query hook for data fetching (`useQuery`)
-- Table or card list layout using shared `Table` or `Card` components
-- Loading and error states
+- Use `Card` component as container
+- Use `StatusPill` for status indicators (map entity status to design system: waiting/in_progress/ready/delayed)
+- Use `EmptyState` when list is empty
+- Use `LoadingSpinner` for loading state
+- Use `Button` for actions (create, edit, delete)
 - Role-based action buttons (hidden for unauthorized roles)
+- Use Heroicons for all icons
 
 ### 2. `client/src/features/<name>/<Name>DetailPage.tsx`
 - Default export (for lazy loading)
 - `useParams()` for ID, TanStack Query for detail fetch
-- Detail display with edit/delete actions (role-gated)
-- Loading and error states
+- Use `Card` component as container
+- Use `StatusPill` for status display
+- Use `Button` for edit/delete actions (role-gated)
+- Use `LoadingSpinner` for loading state
+- Use Heroicons for back button and other icons
 
 ### 3. `client/src/features/<name>/<Name>Form.tsx`
-- Create/edit form using shared `FormInput`, `Select` components
+- Create/edit form using `FormInput` component for all fields
+- Use `Button` for submit and cancel actions
 - TanStack Query mutation (`useMutation`) for submit
-- Validation feedback
+- Validation feedback via `FormInput` error prop
 - i18n labels and placeholders
+- Use `Card` as form container
 
 ### 4. `client/src/features/<name>/<Name>Card.tsx`
-- Compact card component for list views
-- Key fields displayed
+- Use `Card` component as wrapper
+- Use `Avatar` if displaying user/patient initials
+- Use `StatusPill` for status
+- Key fields displayed with design system typography
 - Click-through to detail
 
 ### 5. `client/src/features/<name>/index.ts`
@@ -70,6 +81,32 @@ Generate the following files:
 
 - See `.github/instructions/react.instructions.md` for detailed patterns
 - Function components only, named exports
-- Tailwind CSS v4 for all styling
+- Tailwind CSS v4 for all styling with design system tokens
 - `useTranslation()` for all user-facing strings
 - TanStack Query for all server state
+- **Always use design system components** from `client/src/components/ui/`
+- **Always use Heroicons** from `@heroicons/react`
+- **Always include empty states** using `EmptyState` component
+- **Always include loading states** using `LoadingSpinner` component
+- **Map entity statuses** to design system status types (waiting/in_progress/ready/delayed)
+
+## Design System Components
+
+Import from `client/src/components/ui`:
+- `Button` — actions (primary, secondary, ghost, danger)
+- `Card` — containers
+- `StatusPill` — status indicators with icon + label
+- `MetricCard` — dashboard metrics
+- `FormInput` — form fields
+- `Modal` — dialogs
+- `EmptyState` — empty views
+- `LoadingSpinner` — loading indicators
+- `Avatar` — user initials
+
+## Icons
+
+Import from `@heroicons/react`:
+```typescript
+import { UserIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon } from '@heroicons/react/24/solid';
+```

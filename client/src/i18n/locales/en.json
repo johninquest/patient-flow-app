@@ -11,7 +11,8 @@
     "filter": "Filter",
     "actions": "Actions",
     "confirm": "Confirm",
-    "back": "Back"
+    "back": "Back",
+    "viewAll": "View all"
   },
   "auth": {
     "login": "Login",
@@ -46,7 +47,15 @@
     "phone": "Phone",
     "email": "Email",
     "address": "Address",
-    "notes": "Notes"
+    "notes": "Notes",
+    "notFound": "Patient not found",
+    "status": {
+      "active": "Active"
+    },
+    "empty": {
+      "title": "No patients yet",
+      "description": "Get started by adding your first patient to the system."
+    }
   },
   "encounters": {
     "title": "Encounters",
@@ -55,12 +64,17 @@
     "scheduledTime": "Scheduled Time",
     "assignedTo": "Assigned To",
     "notes": "Notes",
+    "notFound": "Encounter not found",
     "statuses": {
       "scheduled": "Scheduled",
       "checked_in": "Checked In",
       "in_progress": "In Progress",
       "completed": "Completed",
       "cancelled": "Cancelled"
+    },
+    "empty": {
+      "title": "No encounters yet",
+      "description": "Create your first encounter to start tracking patient visits."
     }
   },
   "tasks": {
@@ -81,6 +95,10 @@
       "low": "Low",
       "medium": "Medium",
       "high": "High"
+    },
+    "empty": {
+      "title": "No tasks yet",
+      "description": "Tasks will appear here when they are created for encounters."
     }
   },
   "staff": {

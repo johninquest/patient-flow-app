@@ -95,9 +95,82 @@ Always add keys for **both** locales when adding new user-facing strings.
 ## Styling — Tailwind CSS v4
 
 - **Tailwind only** — no inline styles, no CSS modules, no styled-components
-- Use utility classes directly: `className="flex items-center gap-2 text-sm text-gray-600"`
+- Use utility classes directly: `className="flex items-center gap-2 text-sm text-text-secondary"`
 - For complex repeated patterns, extract to a component, not a CSS class
-- Design tokens (colors, spacing) configured in `tailwind.config.ts`
+- Design tokens defined in `client/src/index.css` using `@theme` directive
+
+## Design System
+
+The application uses a comprehensive design system with predefined tokens and reusable components. **Always use design system components instead of building custom UI elements.**
+
+### Design Tokens
+
+All design tokens are defined in `client/src/index.css` and available as Tailwind utilities:
+
+**Colors:**
+- Brand: `primary` (#0E7C86), `accent` (#3B82C4)
+- Text: `text-primary` (#1B2023), `text-secondary` (#5C6469)
+- Backgrounds: `bg-canvas` (#F6F7F7), `bg-surface` (#FFFFFF)
+- Borders: `border-default` (#E4E7E8)
+- Status colors (always pair with icon + label for accessibility):
+  - Waiting: `status-waiting-bg` (#FAEEDA), `status-waiting-text` (#633806)
+  - In Progress: `status-progress-bg` (#E1F5EE), `status-progress-text` (#085041)
+  - Ready: `status-ready-bg` (#EAF3DE), `status-ready-text` (#27500A)
+  - Delayed: `status-delayed-bg` (#FCEBEB), `status-delayed-text` (#791F1F)
+
+**Typography:**
+- Font: Inter (400, 500 weights)
+- Scale: `text-xs` (12px), `text-sm` (14px), `text-base` (16px), `text-lg` (20px), `text-xl` (24px), `text-2xl` (32px)
+
+**Spacing & Layout:**
+- 8pt grid: 4, 8, 12, 16, 24, 32, 48px
+- Corner radius: `radius-control` (8px), `radius-card` (10-12px)
+- Mobile-first breakpoints: base (0), tablet (768px), desktop (1024px)
+
+### UI Component Library
+
+All reusable components are in `client/src/components/ui/`. **Use these instead of building custom UI:**
+
+- **Button** — Primary, secondary, ghost, danger variants with loading states
+- **Card** — Container with surface background and border
+- **StatusPill** — Status indicators with icon + label (never color alone)
+- **MetricCard** — Dashboard metric display with label, value, icon, link
+- **FormInput** — Form field with label, input, error, help text
+- **Modal** — Accessible modal with focus trap
+- **EmptyState** — Empty list/view state with icon, title, description, action
+- **LoadingSpinner** — Loading indicator with optional text
+- **Avatar** — User initials with status-based coloring
+
+**Import pattern:**
+```typescript
+import { Button, Card, StatusPill, MetricCard } from '../components/ui';
+```
+
+### Icons
+
+Use `@heroicons/react` for all icons:
+```typescript
+import { UserIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon } from '@heroicons/react/24/solid';
+```
+
+- Use outline icons for navigation and general UI
+- Use solid icons for active states and emphasis
+- Never use inline SVGs unless absolutely necessary
+
+### Accessibility
+
+- **WCAG AA compliance** — all text/background pairs meet 4.5:1 contrast ratio
+- **Status indicators** — never use color alone, always include icon + text label
+- **Empty states** — design empty, loading, and error states for every list view
+- **Focus management** — use design system components which handle focus correctly
+
+### Responsive Design
+
+- **Mobile-first** — base styles for mobile, use `sm:`, `md:`, `lg:` breakpoints for larger screens
+- **Navigation** — bottom tab bar on mobile (<1024px), sidebar on desktop (≥1024px)
+- **Layout** — single column on mobile, multi-column on desktop
+- **Touch targets** — minimum 44x44px for interactive elements on mobile
 
 ## Routing — React Router v7
 

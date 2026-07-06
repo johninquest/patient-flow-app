@@ -15,11 +15,13 @@
 | Auth | Better Auth (basic — no org plugin) |
 | Validation | class-validator + class-transformer |
 | API Docs | @nestjs/swagger |
-| Frontend | React 19 · TypeScript · Vite 7 (CSR SPA) |
-| Styling | Tailwind CSS v4 |
+| Frontend | React 18 · TypeScript · Vite 5 (CSR SPA) |
+| Styling | Tailwind CSS v4 + Design System |
+| Icons | @heroicons/react |
+| Fonts | @fontsource/inter |
 | Server state | TanStack Query v5 |
 | Client state | React Context (auth/session only) |
-| Routing | React Router v7 (lazy routes) |
+| Routing | React Router v6 (lazy routes) |
 | i18n | react-i18next + i18next (en + fr) |
 
 ## Project Layout
@@ -39,7 +41,10 @@ api/
       user/          # User management + role assignment
 client/
   src/
-    components/      # Reusable UI primitives (Button, Modal, Table, etc.)
+    components/      # Reusable UI primitives
+      ui/            # Design system components (Button, Card, StatusPill, etc.)
+      Layout.tsx     # App shell with sidebar/bottom nav
+      BottomTabBar.tsx
     features/        # Feature modules (patients, encounters, tasks, staff)
     hooks/           # Custom hooks (useAuth, query wrappers)
     lib/             # API client, config, utils, types
@@ -92,11 +97,16 @@ docs/
 - **Timestamps** — `created_at` / `updated_at` with `.defaultNow().notNull()`.
 - **Migration workflow** — schema change → `npm run db:generate` → review SQL → `npm run db:migrate`. Never edit files in `drizzle/` manually.
 - **Table naming** — snake_case, plural (e.g., `patients`, `encounters`, `tasks`).
-
-### Frontend
-- **Function components only** — no class components.
+Design System** — use components from `client/src/components/ui/` (Button, Card, StatusPill, MetricCard, FormInput, Modal, EmptyState, LoadingSpinner, Avatar). Never build custom UI elements.
+- **Design Tokens** — all colors, spacing, typography defined in `client/src/index.css` via Tailwind v4 `@theme` directive. Use tokens (e.g., `text-primary`, `bg-canvas`, `status-ready-bg`), never hardcoded values.
+- **Icons** — use `@heroicons/react` only. Outline icons for navigation, solid for active states. Never inline SVGs.
 - **TanStack Query** — all server state via `useQuery`/`useMutation`. No manual fetch/axios in components.
 - **React Context** — auth/session state only. Everything else in TanStack Query or local state.
+- **i18n everywhere** — all user-facing strings via `useTranslation()` hook. Never hardcode English text.
+- **Tailwind CSS v4 only** — no inline styles, no CSS modules, no styled-components.
+- **Lazy routes** — all feature routes lazy-loaded with `React.lazy()` + `Suspense`.
+- **Accessibility** — WCAG AA compliance. Status indicators must include icon + label (never color alone). All list views need empty/loading/error states.
+- **Responsive** — mobile-first. Bottom tab bar on mobile (<1024px), sidebar on desktop (≥1024px) local state.
 - **i18n everywhere** — all user-facing strings via `useTranslation()` hook. Never hardcode English text.
 - **Tailwind CSS v4 only** — no inline styles, no CSS modules, no styled-components.
 - **Lazy routes** — all feature routes lazy-loaded with `React.lazy()` + `Suspense`.
@@ -130,7 +140,8 @@ docker-compose up -d         # Background
 ```
 
 ## Scoped Instructions
-
+design-system.instructions.md` — Design system rules, tokens, and component usage (applies to `client/src/**`)
+- `.github/instructions/
 For detailed patterns per area, see:
 - `.github/instructions/api-module.instructions.md` — NestJS module patterns (applies to `api/src/modules/**`)
 - `.github/instructions/drizzle-schema.instructions.md` — Database schema patterns (applies to `api/src/core/db/schema.ts`)

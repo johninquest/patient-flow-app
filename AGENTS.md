@@ -6,7 +6,7 @@
 
 ```
 api/        # NestJS backend (Node.js LTS, npm)
-client/     # React 19 + Vite 7 frontend (CSR SPA)
+client/     # React 18 + Vite 5 frontend (CSR SPA)
 drizzle/    # Migration SQL files (generated, do not edit manually)
 docs/
   decisions/  # Architecture Decision Records (ADRs)
@@ -94,14 +94,18 @@ export class ResourceController {
 
 ### Client (React)
 
-- **CSR SPA**: Pure client-side rendered application using React 19 + Vite 7.
+- **CSR SPA**: Pure client-side rendered application using React 18 + Vite 5.
 - **API client**: `client/src/lib/api/client.ts` — centralized fetch wrapper with `credentials: 'include'` for cookie-based auth.
 - **API URL**: resolved in `client/src/lib/config.ts` — automatically switches between `localhost:3000` (dev) and production URL.
 - **Auth**: Better Auth client-side SDK; auth state managed via React Context in `client/src/hooks/useAuth.ts`.
 - **Server state**: TanStack Query v5 for all API data fetching and caching.
 - **i18n**: `client/src/i18n/` — supported locales: `en`, `fr`. Always use `useTranslation()` hook for user-facing strings.
-- **Components**: `client/src/components/` — reusable UI primitives (Button, Modal, Table, FormInput, etc.). Prefer these over new one-off components.
+- **Design System**: Comprehensive component library in `client/src/components/ui/` (Button, Card, StatusPill, MetricCard, FormInput, Modal, EmptyState, LoadingSpinner, Avatar). **Always use these instead of building custom UI.**
+- **Design Tokens**: All colors, spacing, typography defined in `client/src/index.css` via Tailwind v4 `@theme` directive. Use tokens (e.g., `text-primary`, `bg-canvas`, `status-ready-bg`), never hardcoded values.
+- **Icons**: Use `@heroicons/react` only. Outline icons for navigation, solid for active states. Never inline SVGs.
 - **Styling**: Tailwind CSS v4 only — no inline styles, no CSS modules.
+- **Accessibility**: WCAG AA compliance. Status indicators must include icon + label (never color alone). All list views need empty/loading/error states.
+- **Responsive**: Mobile-first. Bottom tab bar on mobile (<1024px), sidebar on desktop (≥1024px).
 
 #### React feature pattern
 ```
@@ -112,7 +116,39 @@ features/<name>/
   <Name>Card.tsx           # Card/list item component
   index.ts                 # Public exports
 ```
+r/index.tsx`
 
+#### Design System Components
+
+Located in `client/src/components/ui/`:
+- **Button** — Primary, secondary, ghost, danger variants with loading states
+- **Card** — Container with surface background and border
+- **StatusPill** — Status indicators with icon + label (never color alone)
+- **MetricCard** — Dashboard metric display with label, value, icon, link
+- **FormInput** — Form field with label, input, error, help text
+- **Modal** — Accessible modal with focus trap
+- **EmptyState** — Empty list/view state with icon, title, description, action
+- **LoadingSpinner** — Loading indicator with optional text
+- **Avatar** — User initials with status-based coloring
+
+Import pattern:
+```typescript
+import { Button, Card, StatusPill } from '../components/ui';
+```
+
+#### Status Mapping
+
+Map entity statuses to design system status types:
+- Encounter `scheduled`/`checked_in` → `waiting`
+- Encounter `in_progress` → `in_progress`
+- Encounter `completed` → `ready`
+- Encounter `cancelled` → `delayed`
+- Task `todo` → `waiting`
+- Task `in_progress` → `in_progress`
+- Task `done` → `ready`
+- Priority `high` → `delayed`
+- Priority `medium` → `waiting`
+- Priority `low` → `ready
 #### Routing
 - All routes lazy-loaded with `React.lazy()` + `Suspense`
 - Protected routes wrapped in `ProtectedRoute` component

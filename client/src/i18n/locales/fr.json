@@ -11,7 +11,8 @@
     "filter": "Filtrer",
     "actions": "Actions",
     "confirm": "Confirmer",
-    "back": "Retour"
+    "back": "Retour",
+    "viewAll": "Voir tout"
   },
   "auth": {
     "login": "Connexion",
@@ -46,7 +47,15 @@
     "phone": "Téléphone",
     "email": "Email",
     "address": "Adresse",
-    "notes": "Notes"
+    "notes": "Notes",
+    "notFound": "Patient introuvable",
+    "status": {
+      "active": "Actif"
+    },
+    "empty": {
+      "title": "Aucun patient pour le moment",
+      "description": "Commencez par ajouter votre premier patient au système."
+    }
   },
   "encounters": {
     "title": "Consultations",
@@ -55,12 +64,17 @@
     "scheduledTime": "Heure prévue",
     "assignedTo": "Assigné à",
     "notes": "Notes",
+    "notFound": "Consultation introuvable",
     "statuses": {
       "scheduled": "Planifié",
       "checked_in": "Arrivé",
       "in_progress": "En cours",
       "completed": "Terminé",
       "cancelled": "Annulé"
+    },
+    "empty": {
+      "title": "Aucune consultation pour le moment",
+      "description": "Créez votre première consultation pour commencer à suivre les visites des patients."
     }
   },
   "tasks": {
@@ -81,6 +95,10 @@
       "low": "Faible",
       "medium": "Moyenne",
       "high": "Élevée"
+    },
+    "empty": {
+      "title": "Aucune tâche pour le moment",
+      "description": "Les tâches apparaîtront ici lorsqu'elles seront créées pour les consultations."
     }
   },
   "staff": {

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
+import { Card, FormInput, Button } from '../components/ui';
 
 export default function Login() {
   const { t } = useTranslation();
@@ -22,7 +23,6 @@ export default function Login() {
       navigate('/dashboard');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed';
-      // Check if it's a suspended account error
       if (message.includes('suspended')) {
         setError(t('auth.accountSuspended'));
       } else {
@@ -34,75 +34,62 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            {t('auth.loginTitle')}
-          </h2>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <p className="text-sm text-red-800">{error}</p>
-            </div>
-          )}
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email" className="sr-only">
-                {t('auth.email')}
-              </label>
-              <input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
-                placeholder={t('auth.email')}
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                {t('auth.password')}
-              </label>
-              <input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
-                placeholder={t('auth.password')}
-              />
-            </div>
-          </div>
-
+    <div className="min-h-screen flex items-center justify-center bg-bg-canvas py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="max-w-md w-full" padding="lg">
+        <div className="space-y-6">
           <div>
-            <button
+            <h2 className="text-center text-2xl font-medium text-text-primary">
+              {t('auth.loginTitle')}
+            </h2>
+          </div>
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            {error && (
+              <div className="rounded-[var(--radius-control)] bg-status-delayed-bg p-4">
+                <p className="text-sm text-status-delayed-text">{error}</p>
+              </div>
+            )}
+            <FormInput
+              label={t('auth.email')}
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder={t('auth.email')}
+            />
+            <FormInput
+              label={t('auth.password')}
+              id="password"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={t('auth.password')}
+            />
+            <Button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
+              loading={loading}
+              className="w-full"
             >
-              {loading ? t('common.loading') : t('auth.login')}
-            </button>
-          </div>
-        </form>
+              {t('auth.login')}
+            </Button>
+          </form>
 
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300" />
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border-default" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-bg-surface text-text-secondary">{t('auth.orDivider')}</span>
+            </div>
           </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-gray-50 text-gray-500">{t('auth.orDivider')}</span>
-          </div>
-        </div>
 
-        <div>
-          <button
+          <Button
             type="button"
+            variant="secondary"
             onClick={signInWithGoogle}
-            className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+            className="w-full"
           >
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
               <path
@@ -123,15 +110,15 @@ export default function Login() {
               />
             </svg>
             {t('auth.signInWithGoogle')}
-          </button>
-        </div>
+          </Button>
 
-        <div className="text-center">
-          <p className="text-sm text-gray-600">
-            {t('auth.contactAdmin')}
-          </p>
+          <div className="text-center">
+            <p className="text-sm text-text-secondary">
+              {t('auth.contactAdmin')}
+            </p>
+          </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

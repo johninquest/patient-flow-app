@@ -1,14 +1,18 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
-import Login from '../pages/Login';
-import Dashboard from '../pages/Dashboard';
-import Patients from '../pages/Patients';
-import PatientDetail from '../pages/PatientDetail';
-import Encounters from '../pages/Encounters';
-import EncounterDetail from '../pages/EncounterDetail';
-import Tasks from '../pages/Tasks';
-import Staff from '../pages/Staff';
+import { LoadingSpinner } from '../components/ui';
+
+// Lazy load all page components
+const Login = lazy(() => import('../pages/Login'));
+const Dashboard = lazy(() => import('../pages/Dashboard'));
+const Patients = lazy(() => import('../pages/Patients'));
+const PatientDetail = lazy(() => import('../pages/PatientDetail'));
+const Encounters = lazy(() => import('../pages/Encounters'));
+const EncounterDetail = lazy(() => import('../pages/EncounterDetail'));
+const Tasks = lazy(() => import('../pages/Tasks'));
+const Staff = lazy(() => import('../pages/Staff'));
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -59,40 +63,42 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 export default function AppRouter() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route
-          path="/login"
-          element={
-            <PublicRoute>
-              <Login />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Layout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="patients" element={<Patients />} />
-          <Route path="patients/:id" element={<PatientDetail />} />
-          <Route path="encounters" element={<Encounters />} />
-          <Route path="encounters/:id" element={<EncounterDetail />} />
-          <Route path="tasks" element={<Tasks />} />
+      <Suspense fallback={<LoadingSpinner className="min-h-screen" />}>
+        <Routes>
           <Route
-            path="staff"
+            path="/login"
             element={
-              <AdminRoute>
-                <Staff />
-              </AdminRoute>
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
             }
           />
-        </Route>
-      </Routes>
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Navigate to="/dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="patients" element={<Patients />} />
+            <Route path="patients/:id" element={<PatientDetail />} />
+            <Route path="encounters" element={<Encounters />} />
+            <Route path="encounters/:id" element={<EncounterDetail />} />
+            <Route path="tasks" element={<Tasks />} />
+            <Route
+              path="staff"
+              element={
+                <AdminRoute>
+                  <Staff />
+                </AdminRoute>
+              }
+            />
+          </Route>
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api/client';
 import { useAuth } from '../contexts/AuthContext';
+import { Card, Button, FormInput, Modal, StatusPill, LoadingSpinner } from '../components/ui';
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 interface StaffMember {
   id: string;
@@ -118,86 +120,72 @@ export default function Staff() {
   };
 
   if (isLoading) {
-    return <div className="text-center py-12">{t('common.loading')}</div>;
+    return <LoadingSpinner text={t('common.loading')} className="py-12" />;
   }
 
   return (
     <div>
-      <div className="mb-8 flex justify-between items-center">
+      <div className="mb-6 flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('staff.title')}</h1>
-          <p className="mt-1 text-sm text-gray-500">{t('staff.description')}</p>
+          <h1 className="text-2xl font-medium text-text-primary">{t('staff.title')}</h1>
+          <p className="mt-1 text-sm text-text-secondary">{t('staff.description')}</p>
         </div>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
-        >
+        <Button onClick={() => setShowCreateModal(true)}>
           {t('staff.createStaff')}
-        </button>
+        </Button>
       </div>
 
       {error && (
-        <div className="mb-4 rounded-md bg-red-50 p-4">
-          <p className="text-sm text-red-700">{error}</p>
-        </div>
+        <Card className="mb-4 bg-status-delayed-bg border-status-delayed-text/20">
+          <p className="text-sm text-status-delayed-text">{error}</p>
+        </Card>
       )}
 
       {/* Create Staff Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-            <form onSubmit={handleCreateStaff}>
-              <div className="p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">{t('staff.createStaff')}</h2>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">{t('staff.name')}</label>
-                    <input
-                      type="text"
-                      name="name"
-                      required
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">{t('staff.email')}</label>
-                    <input
-                      type="email"
-                      name="email"
-                      required
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">{t('staff.password')}</label>
-                    <input
-                      type="password"
-                      name="password"
-                      required
-                      minLength={8}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">{t('staff.confirmPassword')}</label>
-                    <input
-                      type="password"
-                      name="confirmPassword"
-                      required
-                      minLength={8}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">{t('staff.role')}</label>
-                    <select
-                      name="role"
-                      required
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-                    >
-                      {ROLES.map((role) => (
-                        <option key={role} value={role}>
-                          {t(`staff.roles.${role}`)}
+      <Modal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        title={t('staff.createStaff')}
+      >
+        <form onSubmit={handleCreateStaff} className="space-y-4">
+          <FormInput
+            label={t('staff.name')}
+            name="name"
+            type="text"
+            required
+          />
+          <FormInput
+            label={t('staff.email')}
+            name="email"
+            type="email"
+            required
+          />
+          <FormInput
+            label={t('staff.password')}
+            name="password"
+            type="password"
+            required
+            minLength={8}
+          />
+          <FormInput
+            label={t('staff.confirmPassword')}
+            name="confirmPassword"
+            type="password"
+            required
+            minLength={8}
+          />
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">
+              {t('staff.role')}
+            </label>
+            <select
+              name="role"
+              required
+              className="w-full px-3 py-2 border border-border-default rounded-[var(--radius-control)] bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+            >
+              {ROLES.map((role) => (
+                <option key={role} value={role}>
+                  {t(`staff.roles.${role}`)}
                         </option>
                       ))}
                     </select>
@@ -216,170 +204,169 @@ export default function Staff() {
                       ))}
                     </select>
                   </div>
-                </div>
-              </div>
-              <div className="bg-gray-50 px-6 py-4 flex justify-end space-x-3 rounded-b-lg">
-                <button
-                  type="button"
-                  onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                >
-                  {t('common.cancel')}
-                </button>
-                <button
-                  type="submit"
-                  disabled={createMutation.isPending}
-                  className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 disabled:opacity-50"
-                >
-                  {createMutation.isPending ? t('common.loading') : t('common.create')}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+                  <div className="flex justify-end gap-3 pt-4">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => setShowCreateModal(false)}
+                    >
+                      {t('common.cancel')}
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={createMutation.isPending}
+                      loading={createMutation.isPending}
+                    >
+                      {t('common.create')}
+                    </Button>
+                  </div>
+                </form>
+              </Modal>
 
       {/* Suspend Confirmation Modal */}
-      {showSuspendConfirm && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">{t('staff.confirmSuspend')}</h2>
-            <p className="text-sm text-gray-600 mb-6">{t('staff.suspendWarning')}</p>
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => setShowSuspendConfirm(null)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-              >
-                {t('common.cancel')}
-              </button>
-              <button
-                onClick={() => {
+      <Modal
+        isOpen={!!showSuspendConfirm}
+        onClose={() => setShowSuspendConfirm(null)}
+        title={t('staff.confirmSuspend')}
+        size="sm"
+      >
+        <div className="space-y-4">
+          <div className="flex items-start gap-3">
+            <ExclamationTriangleIcon className="w-6 h-6 text-status-delayed-text flex-shrink-0" />
+            <p className="text-sm text-text-secondary">{t('staff.suspendWarning')}</p>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="secondary"
+              onClick={() => setShowSuspendConfirm(null)}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="danger"
+              onClick={() => {
+                if (showSuspendConfirm) {
                   statusMutation.mutate({ id: showSuspendConfirm, status: 'suspended' });
-                }}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
-              >
-                {t('staff.suspend')}
-              </button>
-            </div>
+                }
+              }}
+              loading={statusMutation.isPending}
+            >
+              {t('staff.suspend')}
+            </Button>
           </div>
         </div>
-      )}
+      </Modal>
 
-      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('staff.name')}
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('staff.email')}
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('staff.role')}
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('staff.title_field')}
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('staff.status')}
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('staff.joined')}
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('common.actions')}
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {staff?.map((member) => {
-              const isSelf = member.id === currentUser?.id;
-              const isSuspended = member.status === 'suspended';
-              return (
-                <tr key={member.id} className={`${isSelf ? 'bg-blue-50' : ''} ${isSuspended ? 'opacity-60' : ''}`}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div>
-                        <div className={`text-sm font-medium ${isSuspended ? 'text-gray-500 line-through' : 'text-gray-900'}`}>
-                          {member.name || '—'}
-                          {isSelf && (
-                            <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                              {t('staff.you')}
-                            </span>
-                          )}
+      <Card padding="none">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-border-default">
+            <thead className="bg-bg-canvas">
+              <tr>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  {t('staff.name')}
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  {t('staff.email')}
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  {t('staff.role')}
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  {t('staff.title_field')}
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  {t('staff.status')}
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  {t('staff.joined')}
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  {t('common.actions')}
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-bg-surface divide-y divide-border-default">
+              {staff?.map((member) => {
+                const isSelf = member.id === currentUser?.id;
+                const isSuspended = member.status === 'suspended';
+                return (
+                  <tr key={member.id} className={`${isSelf ? 'bg-status-progress-bg/30' : ''} ${isSuspended ? 'opacity-60' : ''}`}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div>
+                          <div className={`text-sm font-medium ${isSuspended ? 'text-text-secondary line-through' : 'text-text-primary'}`}>
+                            {member.name || '—'}
+                            {isSelf && (
+                              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-status-progress-bg text-status-progress-text">
+                                {t('staff.you')}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{member.email}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <select
-                      value={member.role}
-                      onChange={(e) => handleRoleChange(member.id, e.target.value)}
-                      disabled={isSelf && member.role === 'admin'}
-                      className="text-sm border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                      title={isSelf && member.role === 'admin' ? t('staff.cannotDemoteSelf') : undefined}
-                    >
-                      {ROLES.map((role) => (
-                        <option key={role} value={role}>
-                          {t(`staff.roles.${role}`)}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <select
-                      value={member.title || ''}
-                      onChange={(e) => handleTitleChange(member.id, e.target.value)}
-                      disabled={isSuspended}
-                      className="text-sm border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50"
-                    >
-                      <option value="">{t('staff.noTitle')}</option>
-                      {TITLES.map((title) => (
-                        <option key={title} value={title}>
-                          {title}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        isSuspended
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-green-100 text-green-800'
-                      }`}
-                    >
-                      {isSuspended ? t('staff.suspended') : t('staff.active')}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(member.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {!isSelf && (
-                      <button
-                        onClick={() => handleStatusChange(member.id, isSuspended ? 'active' : 'suspended')}
-                        disabled={statusMutation.isPending}
-                        className={`px-3 py-1 text-xs font-medium rounded-md ${
-                          isSuspended
-                            ? 'bg-green-600 text-white hover:bg-green-700'
-                            : 'bg-red-600 text-white hover:bg-red-700'
-                        } disabled:opacity-50`}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-text-primary">{member.email}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <select
+                        value={member.role}
+                        onChange={(e) => handleRoleChange(member.id, e.target.value)}
+                        disabled={isSelf && member.role === 'admin'}
+                        className="text-sm border border-border-default rounded-[var(--radius-control)] px-2 py-1 bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                        title={isSelf && member.role === 'admin' ? t('staff.cannotDemoteSelf') : undefined}
                       >
-                        {isSuspended ? t('staff.activate') : t('staff.suspend')}
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                        {ROLES.map((role) => (
+                          <option key={role} value={role}>
+                            {t(`staff.roles.${role}`)}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <select
+                        value={member.title || ''}
+                        onChange={(e) => handleTitleChange(member.id, e.target.value)}
+                        disabled={isSuspended}
+                        className="text-sm border border-border-default rounded-[var(--radius-control)] px-2 py-1 bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary disabled:opacity-50"
+                      >
+                        <option value="">{t('staff.noTitle')}</option>
+                        {TITLES.map((title) => (
+                          <option key={title} value={title}>
+                            {title}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <StatusPill
+                        status={isSuspended ? 'delayed' : 'ready'}
+                        label={isSuspended ? t('staff.suspended') : t('staff.active')}
+                      />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
+                      {new Date(member.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      {!isSelf && (
+                        <Button
+                          variant={isSuspended ? 'secondary' : 'danger'}
+                          size="sm"
+                          onClick={() => handleStatusChange(member.id, isSuspended ? 'active' : 'suspended')}
+                          disabled={statusMutation.isPending}
+                          loading={statusMutation.isPending}
+                        >
+                          {isSuspended ? t('staff.activate') : t('staff.suspend')}
+                        </Button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </Card>
     </div>
   );
 }
