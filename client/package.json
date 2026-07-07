@@ -1,6 +1,6 @@
 {
     "name": "patient-flow-client",
-    "version": "1.0.0",
+    "version": "0.7.7",
     "description": "Patient Flow Client - Healthcare workflow UI",
     "private": true,
     "type": "module",
