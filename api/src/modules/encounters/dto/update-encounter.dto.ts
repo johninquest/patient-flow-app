@@ -6,7 +6,7 @@ export class UpdateEncounterDto {
   status?: string;
 
   @IsOptional()
-  @IsUUID()
+  @IsString()
   assigned_to?: string;
 
   @IsOptional()

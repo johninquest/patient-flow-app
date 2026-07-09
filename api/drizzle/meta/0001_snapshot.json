@@ -1,6 +1,6 @@
 {
-  "id": "bd63f813-2041-42ce-9026-7023806694c7",
-  "prevId": "d197ff85-1ace-4ced-93ab-922c9eba19a1",
+  "id": "c4003232-d299-4d7d-b11b-7bb81b1c37e2",
+  "prevId": "9a36acfa-21a7-4521-ad74-ed461972f353",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -124,7 +124,7 @@
         },
         "actor_user_id": {
           "name": "actor_user_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -286,7 +286,7 @@
         },
         "assigned_to": {
           "name": "assigned_to",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -661,7 +661,7 @@
         },
         "assigned_user_id": {
           "name": "assigned_user_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },

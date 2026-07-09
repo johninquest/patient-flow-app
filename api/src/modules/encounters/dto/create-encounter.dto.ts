@@ -5,7 +5,7 @@ export class CreateEncounterDto {
   patient_id: string;
 
   @IsOptional()
-  @IsUUID()
+  @IsString()
   assigned_to?: string;
 
   @IsOptional()

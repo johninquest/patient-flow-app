@@ -6,9 +6,9 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_USER=patientflow
-      - POSTGRES_PASSWORD=patientflow_dev_password
-      - POSTGRES_DB=patientflow
+      - POSTGRES_USER=pfuser
+      - POSTGRES_PASSWORD=pfDevPassword
+      - POSTGRES_DB=pfdb
     volumes:
       - postgres_data:/var/lib/postgresql
     networks:

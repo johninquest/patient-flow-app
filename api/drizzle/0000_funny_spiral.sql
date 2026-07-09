@@ -86,6 +86,7 @@ CREATE TABLE "user" (
 	"image" text,
 	"role" text DEFAULT 'front_desk' NOT NULL,
 	"title" text,
+	"status" text DEFAULT 'active' NOT NULL,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "user_email_unique" UNIQUE("email")

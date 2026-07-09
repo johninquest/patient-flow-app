@@ -103,7 +103,7 @@ export const encounters = pgTable(
       .notNull()
       .references(() => patients.id, { onDelete: 'cascade' }),
     status: text('status').notNull(), // 'scheduled' | 'checked_in' | 'in_progress' | 'completed' | 'cancelled'
-    assigned_to: uuid('assigned_to').references(() => user.id, {
+    assigned_to: text('assigned_to').references(() => user.id, {
       onDelete: 'set null',
     }),
     scheduled_time: timestamp('scheduled_time'),
@@ -135,7 +135,7 @@ export const tasks = pgTable(
     description: text('description'),
     status: text('status').notNull(), // 'todo' | 'in_progress' | 'done'
     priority: text('priority').notNull(), // 'low' | 'medium' | 'high'
-    assigned_user_id: uuid('assigned_user_id').references(() => user.id, {
+    assigned_user_id: text('assigned_user_id').references(() => user.id, {
       onDelete: 'set null',
     }),
     assigned_role: text('assigned_role'),
@@ -160,7 +160,7 @@ export const audit_log = pgTable(
     id: uuid('id')
       .primaryKey()
       .default(sql`uuidv7()`),
-    actor_user_id: uuid('actor_user_id')
+    actor_user_id: text('actor_user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
     actor_role: text('actor_role').notNull(),

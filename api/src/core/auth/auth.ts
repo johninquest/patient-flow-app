@@ -40,7 +40,7 @@ export function getAuth(): any {
       basePath: '/api/auth',
       emailAndPassword: {
         enabled: true,
-        disableSignUp: true, // Admin creates accounts; self-registration disabled
+        disableSignUp: false, // TEMPORARILY enabled for initial admin bootstrap
       },
       socialProviders: {
         google: {
@@ -61,6 +61,24 @@ export function getAuth(): any {
           sameSite: 'lax',
           secure: isProduction, // ✅ false for localhost (HTTP), true for production (HTTPS)
           httpOnly: true,
+        },
+      },
+      user: {
+        additionalFields: {
+          role: {
+            type: 'string',
+            required: true,
+            defaultValue: 'front_desk',
+          },
+          title: {
+            type: 'string',
+            required: false,
+          },
+          status: {
+            type: 'string',
+            required: true,
+            defaultValue: 'active',
+          },
         },
       },
     });

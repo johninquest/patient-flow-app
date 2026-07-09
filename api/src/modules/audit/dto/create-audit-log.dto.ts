@@ -1,7 +1,7 @@
 import { IsString, IsOptional, IsUUID, IsObject } from 'class-validator';
 
 export class CreateAuditLogDto {
-  @IsUUID()
+  @IsString()
   actor_user_id: string;
 
   @IsString()
