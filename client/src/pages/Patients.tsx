@@ -8,11 +8,11 @@ import { UserGroupIcon, EnvelopeIcon, PhoneIcon } from '@heroicons/react/24/outl
 
 interface Patient {
   id: string;
-  firstName: string;
-  lastName: string;
+  first_name: string;
+  last_name: string;
   email?: string;
   phone?: string;
-  dateOfBirth?: string;
+  date_of_birth?: string;
 }
 
 export default function Patients() {
@@ -43,7 +43,7 @@ export default function Patients() {
         <Card padding="none">
           <ul className="divide-y divide-border-default">
             {patients.map((patient) => {
-              const initials = `${patient.firstName[0]}${patient.lastName[0]}`;
+              const initials = `${patient.first_name[0]}${patient.last_name[0]}`;
               return (
                 <li key={patient.id}>
                   <Link to={`/patients/${patient.id}`} className="block hover:bg-bg-canvas transition-colors">
@@ -53,7 +53,7 @@ export default function Patients() {
                           <Avatar initials={initials} size="md" variant="neutral" />
                           <div>
                             <p className="text-sm font-medium text-text-primary">
-                              {patient.firstName} {patient.lastName}
+                              {patient.first_name} {patient.last_name}
                             </p>
                           </div>
                         </div>

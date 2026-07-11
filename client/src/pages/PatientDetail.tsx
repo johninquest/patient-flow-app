@@ -7,11 +7,11 @@ import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
 interface Patient {
   id: string;
-  firstName: string;
-  lastName: string;
+  first_name: string;
+  last_name: string;
   email?: string;
   phone?: string;
-  dateOfBirth?: string;
+  date_of_birth?: string;
   address?: string;
   notes?: string;
 }
@@ -45,7 +45,7 @@ export default function PatientDetail() {
       <Card padding="none">
         <div className="px-4 py-5 sm:px-6 border-b border-border-default">
           <h3 className="text-lg font-medium text-text-primary">
-            {patient.firstName} {patient.lastName}
+            {patient.first_name} {patient.last_name}
           </h3>
         </div>
         <div>
@@ -62,11 +62,11 @@ export default function PatientDetail() {
                 <dd className="mt-1 text-sm text-text-primary sm:mt-0 sm:col-span-2">{patient.phone}</dd>
               </div>
             )}
-            {patient.dateOfBirth && (
+            {patient.date_of_birth && (
               <div className="bg-bg-canvas px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt className="text-sm font-medium text-text-secondary">{t('patients.dateOfBirth')}</dt>
                 <dd className="mt-1 text-sm text-text-primary sm:mt-0 sm:col-span-2">
-                  {new Date(patient.dateOfBirth).toLocaleDateString()}
+                  {new Date(patient.date_of_birth).toLocaleDateString()}
                 </dd>
               </div>
             )}
