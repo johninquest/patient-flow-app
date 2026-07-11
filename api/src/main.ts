@@ -7,6 +7,11 @@ import { seedAdmin } from './core/auth/seed';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Set global API prefix for all routes except root
+  app.setGlobalPrefix('api', {
+    exclude: ['/'],
+  });
+
   // Enable CORS for the React client with credentials
   const allowedOrigins = process.env.CLIENT_URL?.split(',').map((url) =>
     url.trim(),
@@ -43,7 +48,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
+  SwaggerModule.setup('docs', app, document);
 
   // Configure logging based on environment
   if (process.env.NODE_ENV === 'production') {

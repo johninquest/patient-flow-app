@@ -129,5 +129,18 @@
       "clinical_staff": "Personnel clinique",
       "front_desk": "Accueil"
     }
+  },
+  "profile": {
+    "title": "Mon profil",
+    "accountInfo": "Informations du compte",
+    "email": "Email",
+    "userId": "Identifiant",
+    "memberSince": "Membre depuis",
+    "lastLogin": "Dernière connexion",
+    "role": "Rôle",
+    "jobTitle": "Titre",
+    "status": "Statut",
+    "noTitle": "Aucun titre défini",
+    "never": "Jamais"
   }
 }

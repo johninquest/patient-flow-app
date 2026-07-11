@@ -5,11 +5,12 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { db } from '../../core/db';
-import { user } from '../../core/db/schema';
-import { eq, sql } from 'drizzle-orm';
+import { user, session } from '../../core/db/schema';
+import { eq, sql, desc } from 'drizzle-orm';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserStatusDto } from './dto/update-user-status.dto';
+import { ProfileResponseDto } from './dto/profile-response.dto';
 import { AuditService } from '../audit/audit.service';
 import { getAuth } from '../../core/auth/auth';
 
@@ -63,6 +64,46 @@ export class UserService {
     }
 
     return found;
+  }
+
+  /**
+   * Get the authenticated user's own profile, including last login
+   * from the most recent session.
+   */
+  async findMe(userId: string): Promise<ProfileResponseDto> {
+    const [found] = await db
+      .select({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        emailVerified: user.emailVerified,
+        image: user.image,
+        role: user.role,
+        title: user.title,
+        status: user.status,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      })
+      .from(user)
+      .where(eq(user.id, userId))
+      .limit(1);
+
+    if (!found) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    // Get the most recent session's updatedAt as "last login"
+    const [lastSession] = await db
+      .select({ updatedAt: session.updatedAt })
+      .from(session)
+      .where(eq(session.userId, userId))
+      .orderBy(desc(session.updatedAt))
+      .limit(1);
+
+    return {
+      ...found,
+      lastLogin: lastSession?.updatedAt ?? null,
+    };
   }
 
   /**

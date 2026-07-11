@@ -40,6 +40,14 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @Get('me')
+  @ApiOperation({ summary: 'Get current user profile' })
+  @ApiResponse({ status: 200, description: 'Current user profile data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  getMyProfile(@CurrentUser() currentUser: any) {
+    return this.userService.findMe(currentUser.id);
+  }
+
   @Get(':id')
   @UseGuards(RolesGuard)
   @Roles('admin')

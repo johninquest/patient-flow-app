@@ -63,3 +63,22 @@ class ApiClient {
 }
 
 export const api = new ApiClient(API_BASE_URL);
+
+// Profile API
+export interface ProfileResponse {
+  id: string;
+  name: string | null;
+  email: string;
+  emailVerified: boolean | null;
+  image: string | null;
+  role: string;
+  title: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  lastLogin: string | null;
+}
+
+export async function getMyProfile(): Promise<ProfileResponse> {
+  return api.get<ProfileResponse>('/api/users/me');
+}

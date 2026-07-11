@@ -2,6 +2,7 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import BottomTabBar from './BottomTabBar';
+import { Avatar } from './ui';
 import {
   HomeIcon,
   UserGroupIcon,
@@ -9,6 +10,7 @@ import {
   CheckCircleIcon,
   ShieldCheckIcon,
   ArrowRightOnRectangleIcon,
+  UserCircleIcon,
 } from '@heroicons/react/24/outline';
 import {
   HomeIcon as HomeIconSolid,
@@ -31,6 +33,17 @@ export default function Layout() {
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
+  };
+
+  const getInitials = () => {
+    if (user?.name) {
+      const parts = user.name.trim().split(/\s+/);
+      if (parts.length >= 2) {
+        return parts[0][0] + parts[parts.length - 1][0];
+      }
+      return parts[0].substring(0, 2);
+    }
+    return user?.email?.substring(0, 2) || '??';
   };
 
   const navItems = [
@@ -89,7 +102,14 @@ export default function Layout() {
                 <option value="fr">FR</option>
               </select>
             </div>
-            <div className="text-sm text-text-secondary mb-2 truncate">{user?.email}</div>
+            <button
+              onClick={() => navigate('/profile')}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-[var(--radius-control)] text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-bg-canvas transition-colors mb-2"
+              title={user?.email}
+            >
+              <UserCircleIcon className="w-5 h-5 flex-shrink-0" />
+              <span>{user?.name || t('profile.title')}</span>
+            </button>
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary transition-colors"
@@ -114,6 +134,13 @@ export default function Layout() {
               <option value="en">EN</option>
               <option value="fr">FR</option>
             </select>
+            <button
+              onClick={() => navigate('/profile')}
+              className="flex-shrink-0"
+              aria-label={t('profile.title')}
+            >
+              <Avatar initials={getInitials()} size="sm" variant="in_progress" />
+            </button>
             <button
               onClick={handleLogout}
               className="text-sm text-text-secondary hover:text-text-primary"

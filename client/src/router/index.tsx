@@ -13,6 +13,7 @@ const Encounters = lazy(() => import('../pages/Encounters'));
 const EncounterDetail = lazy(() => import('../pages/EncounterDetail'));
 const Tasks = lazy(() => import('../pages/Tasks'));
 const Staff = lazy(() => import('../pages/Staff'));
+const Profile = lazy(() => import('../pages/Profile'));
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -88,6 +89,7 @@ export default function AppRouter() {
             <Route path="encounters" element={<Encounters />} />
             <Route path="encounters/:id" element={<EncounterDetail />} />
             <Route path="tasks" element={<Tasks />} />
+            <Route path="profile" element={<Profile />} />
             <Route
               path="staff"
               element={
