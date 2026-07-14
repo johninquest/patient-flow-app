@@ -28,7 +28,7 @@ A lightweight patient workflow orchestration system for clinics and healthcare o
 ## Project Structure
 
 ```
-patient-flow-app/
+patient-flow/
 ├── api/          # NestJS backend API
 ├── client/       # React frontend
 └── requirements/ # Project documentation

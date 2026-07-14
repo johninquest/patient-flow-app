@@ -139,13 +139,45 @@ docker-compose up            # Dev (API :3000, client :5173, postgres :5432)
 docker-compose up -d         # Background
 ```
 
+## Agentic Engineering System
+
+This project uses a structured agentic workflow for building features with GitHub Copilot. See `AGENTS_WORKFLOW.md` for the full operating manual.
+
+### Contracts (Source of Truth)
+
+All code must conform to the static contracts in `docs/contracts/`:
+- `api_spec.md` — API endpoints, request/response shapes, roles, error codes
+- `schema.md` — Database tables, columns, types, indexes, relationships
+
+**Contract-first development:** Update contracts BEFORE writing code. Run `/check-contract-drift` to verify conformance.
+
+When generating code, attach contracts to context: `#api_spec.md`, `#schema.md`.
+
+### Agent Profiles (`.github/prompts/`)
+
+Specialized agent profiles for different roles:
+- `/architect` — Planning, schema design, structural decisions
+- `/backend-engineer` — NestJS modules, services, DTOs, Drizzle queries
+- `/frontend-engineer` — React components, pages, TanStack Query hooks, i18n
+- `/tester` — Unit tests, edge cases, mocking, coverage
+- `/reviewer` — Code review, contract conformance, quality gate
+- `/check-contract-drift` — Verify contracts match live code
+
+### Workflow: Plan → Execute → Verify
+
+1. **Plan** — Use `/architect` to produce a file-by-file spec. Review before coding.
+2. **Execute** — Use `/backend-engineer` and `/frontend-engineer` (parallel sessions). Attach contracts.
+3. **Verify** — Use `/tester` for tests, `/reviewer` for review, `/check-contract-drift` for conformance.
+
+Keep sessions lean: separate backend, frontend, and test sessions. Use `/compact` when context degrades.
+
 ## Scoped Instructions
-design-system.instructions.md` — Design system rules, tokens, and component usage (applies to `client/src/**`)
-- `.github/instructions/
+
 For detailed patterns per area, see:
 - `.github/instructions/api-module.instructions.md` — NestJS module patterns (applies to `api/src/modules/**`)
 - `.github/instructions/drizzle-schema.instructions.md` — Database schema patterns (applies to `api/src/core/db/schema.ts`)
 - `.github/instructions/react.instructions.md` — React component patterns (applies to `client/src/**`)
+- `.github/instructions/design-system.instructions.md` — Design system rules, tokens, and component usage (applies to `client/src/**`)
 - `.github/instructions/architecture-decision-reminder.instructions.md` — Remind to log ADRs on significant changes (applies to `**`)
 
 ## Architecture Decision Records
@@ -163,6 +195,14 @@ Common scaffolding tasks have dedicated prompts in `.github/prompts/`:
 - `generate-unit-tests.prompt.md` — Generate service unit tests
 - `add-swagger-decorators.prompt.md` — Audit and add Swagger decorators
 - `log-architecture-decision.prompt.md` — Create an Architecture Decision Record
+- `check-contract-drift.prompt.md` — Verify contracts match live code
+
+Agent profiles (see `AGENTS_WORKFLOW.md` for usage):
+- `architect.md` — System architect for planning and structural decisions
+- `backend-engineer.md` — NestJS implementation agent
+- `frontend-engineer.md` — React implementation agent
+- `tester.md` — Test engineering agent
+- `reviewer.md` — Code review and quality gate agent
 
 ## Explicitly Deferred (Do Not Build)
 
