@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile.prod
     container_name: patient-flow-api
     restart: unless-stopped
+    env_file:
+      - ./api/.env
     environment:
       - NODE_ENV=production
       - PORT=3000

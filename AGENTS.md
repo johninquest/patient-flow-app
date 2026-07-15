@@ -46,11 +46,26 @@ docker-compose -f docker-compose.prod.yml up  # Production
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` at the repo root. Required vars:
-- `DATABASE_URL` – PostgreSQL connection string
-- `AUTH_SECRET` – random secret (generate: `openssl rand -base64 32`)
-- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` – Google OAuth
-- `API_URL` / `CLIENT_URL` – service URLs
+Configuration is split by responsibility:
+
+1. **API environment** — copy `api/.env.example` to `api/.env` and fill in server-side variables:
+   - `DATABASE_URL` – PostgreSQL connection string
+   - `AUTH_SECRET` – random secret (generate: `openssl rand -base64 32`)
+   - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` – Google OAuth
+   - `API_URL` / `CLIENT_URL` – service URLs
+   - `ADMIN_EMAIL` – user to promote to admin on startup
+   - `PORT` – optional, defaults to `3000`
+
+2. **Client environment** — copy `client/.env.example` to `client/.env` and fill in browser-safe variables:
+   - `VITE_API_URL` – base URL of the API (must be accessible from the browser)
+
+3. **Docker orchestration** — copy `.env.example` to `.env` at the repo root. This file is used only by Docker Compose and contains shared variables for the API and database containers:
+   - `DATABASE_URL`
+   - `AUTH_SECRET`
+   - `API_URL`
+   - `CLIENT_URL`
+   - `GOOGLE_CLIENT_ID`
+   - `GOOGLE_CLIENT_SECRET`
 
 ## Architecture
 

@@ -22,15 +22,14 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"
+    env_file:
+      - ./api/.env
     environment:
       - NODE_ENV=development
       - PORT=3000
       - DATABASE_URL=postgresql://patientflow:patientflow_dev_password@postgres:5432/patientflow
-      - AUTH_SECRET=${AUTH_SECRET}
       - API_URL=http://localhost:3000
       - CLIENT_URL=http://localhost:5173
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
     volumes:
       - ./api:/app
       - /app/node_modules

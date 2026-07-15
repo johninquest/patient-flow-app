@@ -3,12 +3,9 @@ import { Pool } from 'pg';
 import * as schema from './schema';
 import { config } from 'dotenv';
 import { resolve } from 'path';
-import { existsSync } from 'fs';
 
-// Default: repo root .env — Fallback: api/.env
-const rootEnv = resolve(__dirname, '../../../../.env');
-const localEnv = resolve(__dirname, '../../../.env');
-config({ path: existsSync(rootEnv) ? rootEnv : localEnv });
+// Load environment variables from the API's own .env file only.
+config({ path: resolve(__dirname, '../../../.env') });
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,

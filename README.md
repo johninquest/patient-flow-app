@@ -55,6 +55,7 @@ npm run start:dev
 ```bash
 cd client
 npm install
+cp .env.example .env  # Configure your environment variables
 npm run dev
 ```
 
@@ -190,22 +191,45 @@ npm run deploy:firebase
 
 ## Environment Variables
 
-Create `.env` file in the root directory:
+Environment configuration is split by responsibility:
+
+- **`api/.env`** — Server-side secrets and configuration for the NestJS API.
+  - `DATABASE_URL`
+  - `AUTH_SECRET`
+  - `GOOGLE_CLIENT_ID`
+  - `GOOGLE_CLIENT_SECRET`
+  - `API_URL`
+  - `CLIENT_URL`
+  - `ADMIN_EMAIL`
+  - `PORT` (optional, defaults to `3000`)
+
+- **`client/.env`** — Browser-safe build-time variables for the Vite client.
+  - `VITE_API_URL`
+
+- **`.env` at repo root** — Used only by Docker Compose for orchestration.
+  - `DATABASE_URL`
+  - `AUTH_SECRET`
+  - `API_URL`
+  - `CLIENT_URL`
+  - `GOOGLE_CLIENT_ID`
+  - `GOOGLE_CLIENT_SECRET`
+
+Example API `.env`:
 
 ```env
-# Database
-DATABASE_URL=postgresql://user:password@host:5432/popaty
-
-# Authentication
+DATABASE_URL=postgresql://user:password@host:5432/patientflow
 AUTH_SECRET=your-secret-key
-
-# API URLs
 API_URL=http://localhost:3000
 CLIENT_URL=http://localhost:5173
-
-# Google OAuth (optional)
 GOOGLE_CLIENT_ID=your-client-id
 GOOGLE_CLIENT_SECRET=your-client-secret
+ADMIN_EMAIL=admin@patientflow.app
+```
+
+Example client `.env`:
+
+```env
+VITE_API_URL=http://localhost:3000
 ```
 
 ## License
