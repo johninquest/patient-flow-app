@@ -4,6 +4,7 @@ FROM node:24-alpine AS builder
 WORKDIR /app
 
 # Install dependencies
+# Use npm ci for reproducible, lockfile-driven installs in production
 COPY package.json package-lock.json* ./
 RUN npm ci
 

@@ -43,6 +43,7 @@ docker-compose -f docker-compose.prod.yml up  # Production
 ```
 
 > **Package manager**: Both API and client use **npm**.
+> **Install policy**: Use `npm ci` for reproducible installs in CI, Docker, and after cloning. Use `npm install` only when intentionally updating dependencies locally. Both packages enforce `minimumReleaseAge=10080` (7 days) via `.npmrc` to reduce supply-chain risk.
 
 ## Environment Variables
 

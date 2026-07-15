@@ -43,10 +43,12 @@ patient-flow/
 
 ### Option 1: Local Development (without Docker)
 
+> **Dependency policy:** Both `api/` and `client/` contain `.npmrc` with `minimumReleaseAge=10080` (7 days). This tells npm to avoid versions published within the last 7 days when resolving updates, reducing supply-chain risk. Docker builds and CI use `npm ci` for reproducible installs.
+
 **Backend:**
 ```bash
 cd api
-npm install
+npm ci
 cp .env.example .env  # Configure your environment variables
 npm run start:dev
 ```
@@ -54,10 +56,15 @@ npm run start:dev
 **Frontend:**
 ```bash
 cd client
-npm install
+npm ci
 cp .env.example .env  # Configure your environment variables
 npm run dev
 ```
+
+**Updating dependencies:**
+- Use `npm install` (or `npm update`, or `npm install <package>@latest`) locally when you intentionally want to update packages.
+- Review the resulting `package-lock.json` diff, run tests, then commit both `package.json` and `package-lock.json`.
+- CI and Docker use `npm ci`, which installs exactly the committed lockfile versions.
 
 ### Option 2: Docker Development
 
