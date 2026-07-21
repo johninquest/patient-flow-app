@@ -16,6 +16,7 @@ export interface Identity {
 export interface Financials {
   health_insurance?: string;
   reimbursement?: string;
+  currency?: string;
 }
 
 export interface EmergencyContact {

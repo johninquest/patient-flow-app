@@ -5,8 +5,10 @@ import {
   IsNotEmpty,
   IsBoolean,
   ValidateNested,
+  IsIn,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ISO_COUNTRY_CODES, ISO_CURRENCY_CODES } from '../../../core/common/iso-codes';
 
 export class AddressDto {
   @IsOptional()
@@ -23,6 +25,7 @@ export class AddressDto {
 
   @IsOptional()
   @IsString()
+  @IsIn(ISO_COUNTRY_CODES, { message: 'country must be a valid ISO 3166-1 alpha-2 code' })
   country?: string;
 }
 
@@ -33,6 +36,7 @@ export class IdentityDto {
 
   @IsOptional()
   @IsString()
+  @IsIn(ISO_COUNTRY_CODES, { message: 'country_national must be a valid ISO 3166-1 alpha-2 code' })
   country_national?: string;
 
   @IsOptional()
@@ -48,6 +52,11 @@ export class FinancialsDto {
   @IsOptional()
   @IsString()
   reimbursement?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(ISO_CURRENCY_CODES, { message: 'currency must be a valid ISO 4217 code' })
+  currency?: string;
 }
 
 export class EmergencyContactDto {

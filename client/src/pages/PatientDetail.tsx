@@ -5,6 +5,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Card, LoadingSpinner, Button } from '../components/ui';
 import { ArrowLeftIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import type { Patient } from '../lib/types/patient.types';
+import { getCountryName, getCurrencyName } from '../lib/iso-data';
 
 function DetailRow({ label, value, alternate }: { label: string; value?: string | null; alternate?: boolean }) {
   if (!value) return null;
@@ -17,8 +18,9 @@ function DetailRow({ label, value, alternate }: { label: string; value?: string 
 }
 
 export default function PatientDetail() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { id } = useParams<{ id: string }>();
+  const locale = i18n.language;
 
   const { data: patient, isLoading } = useQuery({
     queryKey: ['patient', id],
@@ -33,10 +35,25 @@ export default function PatientDetail() {
     return <div className="text-center py-12 text-text-secondary">{t('patients.notFound')}</div>;
   }
 
+  // Resolve country code to localized name for address display
+  const resolvedCountry = patient.address?.country
+    ? getCountryName(patient.address.country, locale)
+    : null;
+
   const addressStr = patient.address
-    ? [patient.address.street, patient.address.postal_code, patient.address.city, patient.address.country]
+    ? [patient.address.street, patient.address.postal_code, patient.address.city, resolvedCountry]
         .filter(Boolean)
         .join(', ')
+    : null;
+
+  // Resolve nationality code to localized name
+  const resolvedNationality = patient.identity?.country_national
+    ? getCountryName(patient.identity.country_national, locale)
+    : null;
+
+  // Resolve currency code to localized name
+  const resolvedCurrency = patient.financials?.currency
+    ? getCurrencyName(patient.financials.currency, locale)
     : null;
 
   return (
@@ -76,7 +93,7 @@ export default function PatientDetail() {
           </div>
           <dl>
             <DetailRow label={t('patients.fields.documentType')} value={patient.identity.document_type} alternate />
-            <DetailRow label={t('patients.fields.countryNational')} value={patient.identity.country_national} />
+            <DetailRow label={t('patients.fields.countryNational')} value={resolvedNationality} />
             <DetailRow label={t('patients.fields.scannedDocument')} value={patient.identity.scanned_document ? t('common.yes') : t('common.no')} alternate />
           </dl>
         </Card>
@@ -103,6 +120,7 @@ export default function PatientDetail() {
           <dl>
             <DetailRow label={t('patients.fields.healthInsurance')} value={patient.financials.health_insurance} alternate />
             <DetailRow label={t('patients.fields.reimbursement')} value={patient.financials.reimbursement} />
+            <DetailRow label={t('patients.fields.currency')} value={resolvedCurrency} alternate />
           </dl>
         </Card>
       )}

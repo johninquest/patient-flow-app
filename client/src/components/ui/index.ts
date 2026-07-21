@@ -3,6 +3,7 @@ export { Card } from './Card';
 export { StatusPill } from './StatusPill';
 export { MetricCard } from './MetricCard';
 export { FormInput } from './FormInput';
+export { FormSelect } from './FormSelect';
 export { Modal } from './Modal';
 export { EmptyState } from './EmptyState';
 export { LoadingSpinner } from './LoadingSpinner';

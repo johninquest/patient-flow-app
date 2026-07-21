@@ -1,13 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { api } from '../lib/api/client';
 import { useAuth } from '../contexts/AuthContext';
-import { Card, Button, FormInput } from '../components/ui';
+import { Card, Button, FormInput, FormSelect } from '../components/ui';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import type { Patient } from '../lib/types/patient.types';
 import { canWriteSection } from '../lib/types/patient.types';
+import { getCountryOptions, getCurrencyOptions, COUNTRY_DEFAULT_CURRENCY } from '../lib/iso-data';
 
 export default function PatientForm() {
   const { t } = useTranslation();
@@ -32,7 +33,7 @@ export default function PatientForm() {
     email: '',
     address: { street: '', postal_code: '', city: '', country: '' },
     identity: { document_type: '', country_national: '', scanned_document: false },
-    financials: { health_insurance: '', reimbursement: '' },
+    financials: { health_insurance: '', reimbursement: '', currency: '' },
     emergency_contact: { name: '', relation: '', phone: '', email: '', comments: '' },
     medical_history: '',
     medical_history_date: '',
@@ -40,6 +41,12 @@ export default function PatientForm() {
     transport_logistics: { modes: { public: '', taxi: '', ambulance: '' }, comments: '' },
     notes: '',
   });
+
+  // Get localized country and currency options based on current locale
+  const { i18n } = useTranslation();
+  const locale = i18n.language;
+  const countryOptions = useMemo(() => getCountryOptions(locale), [locale]);
+  const currencyOptions = useMemo(() => getCurrencyOptions(locale), [locale]);
 
   useEffect(() => {
     if (isEdit && existingPatient) {
@@ -51,7 +58,7 @@ export default function PatientForm() {
         email: existingPatient.email ?? '',
         address: { street: '', postal_code: '', city: '', country: '', ...existingPatient.address },
         identity: { document_type: '', country_national: '', scanned_document: false, ...existingPatient.identity },
-        financials: { health_insurance: '', reimbursement: '', ...existingPatient.financials },
+        financials: { health_insurance: '', reimbursement: '', currency: '', ...existingPatient.financials },
         emergency_contact: { name: '', relation: '', phone: '', email: '', comments: '', ...existingPatient.emergency_contact },
         medical_history: existingPatient.medical_history ?? '',
         medical_history_date: existingPatient.medical_history_date ? existingPatient.medical_history_date.split('T')[0] : '',
@@ -136,10 +143,11 @@ export default function PatientForm() {
     // Financials section
     if (canWriteSection(role, 'financials')) {
       const fin = formData.financials;
-      if (fin && (fin.health_insurance || fin.reimbursement)) {
+      if (fin && (fin.health_insurance || fin.reimbursement || fin.currency)) {
         payload.financials = {
           health_insurance: fin.health_insurance || undefined,
           reimbursement: fin.reimbursement || undefined,
+          currency: fin.currency || undefined,
         };
       }
     }
@@ -235,6 +243,25 @@ export default function PatientForm() {
     }));
   };
 
+  // When address country changes, auto-suggest currency (only if currency is currently empty)
+  const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newCountry = e.target.value;
+    setFormData((prev) => {
+      const updated = {
+        ...prev,
+        address: { ...prev.address, country: newCountry },
+      };
+      // Auto-suggest currency only if currency field is currently empty
+      if (!prev.financials?.currency && newCountry && COUNTRY_DEFAULT_CURRENCY[newCountry]) {
+        updated.financials = {
+          ...prev.financials,
+          currency: COUNTRY_DEFAULT_CURRENCY[newCountry],
+        };
+      }
+      return updated;
+    });
+  };
+
   return (
     <div>
       <div className="mb-6">
@@ -307,10 +334,12 @@ export default function PatientForm() {
                   value={formData.identity.document_type}
                   onChange={handleNestedChange('identity', 'document_type')}
                 />
-                <FormInput
+                <FormSelect
                   label={t('patients.fields.countryNational')}
                   value={formData.identity.country_national}
                   onChange={handleNestedChange('identity', 'country_national')}
+                  options={countryOptions}
+                  placeholder={t('patients.selectCountry')}
                 />
               </div>
               <label className="flex items-center gap-2 text-sm text-text-primary">
@@ -345,10 +374,12 @@ export default function PatientForm() {
                   value={formData.address.city}
                   onChange={handleNestedChange('address', 'city')}
                 />
-                <FormInput
+                <FormSelect
                   label={t('patients.fields.addressCountry')}
                   value={formData.address.country}
-                  onChange={handleNestedChange('address', 'country')}
+                  onChange={handleCountryChange}
+                  options={countryOptions}
+                  placeholder={t('patients.selectCountry')}
                 />
               </div>
             </div>
@@ -358,7 +389,7 @@ export default function PatientForm() {
           {canWriteSection(role, 'financials') && (
             <div className="space-y-4 pt-6 border-t border-border-default">
               <h4 className="text-sm font-medium text-text-primary">{t('patients.sections.financials')}</h4>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
                 <FormInput
                   label={t('patients.fields.healthInsurance')}
                   value={formData.financials.health_insurance}
@@ -368,6 +399,13 @@ export default function PatientForm() {
                   label={t('patients.fields.reimbursement')}
                   value={formData.financials.reimbursement}
                   onChange={handleNestedChange('financials', 'reimbursement')}
+                />
+                <FormSelect
+                  label={t('patients.fields.currency')}
+                  value={formData.financials.currency}
+                  onChange={handleNestedChange('financials', 'currency')}
+                  options={currencyOptions}
+                  placeholder={t('patients.selectCurrency')}
                 />
               </div>
             </div>

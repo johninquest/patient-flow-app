@@ -73,6 +73,7 @@
       "addressCountry": "Pays",
       "healthInsurance": "Assurance maladie",
       "reimbursement": "Remboursement",
+      "currency": "Devise",
       "emergencyName": "Nom du contact",
       "emergencyRelation": "Relation",
       "emergencyComments": "Commentaires",
@@ -86,6 +87,8 @@
       "transportAmbulance": "Ambulance",
       "transportComments": "Commentaires transport"
     },
+    "selectCountry": "Sélectionner un pays",
+    "selectCurrency": "Sélectionner une devise",
     "empty": {
       "title": "Aucun patient pour le moment",
       "description": "Commencez par ajouter votre premier patient au système."

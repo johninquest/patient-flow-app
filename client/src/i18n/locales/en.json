@@ -73,6 +73,7 @@
       "addressCountry": "Country",
       "healthInsurance": "Health Insurance",
       "reimbursement": "Reimbursement",
+      "currency": "Currency",
       "emergencyName": "Contact Name",
       "emergencyRelation": "Relation",
       "emergencyComments": "Comments",
@@ -86,6 +87,8 @@
       "transportAmbulance": "Ambulance",
       "transportComments": "Transport Comments"
     },
+    "selectCountry": "Select a country",
+    "selectCurrency": "Select a currency",
     "empty": {
       "title": "No patients yet",
       "description": "Get started by adding your first patient to the system."

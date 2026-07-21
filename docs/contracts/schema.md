@@ -103,9 +103,9 @@
 | `date_of_birth` | `timestamp` | nullable | |
 | `phone` | `text` | nullable | Single phone number |
 | `email` | `text` | nullable | |
-| `address` | `jsonb` | nullable | `{ street, postal_code, city, country }` |
-| `identity` | `jsonb` | nullable | `{ document_type, country_national, scanned_document }` |
-| `financials` | `jsonb` | nullable | `{ health_insurance, reimbursement }` |
+| `address` | `jsonb` | nullable | `{ street, postal_code, city, country }` — `country` is ISO 3166-1 alpha-2 |
+| `identity` | `jsonb` | nullable | `{ document_type, country_national, scanned_document }` — `country_national` is ISO 3166-1 alpha-2 |
+| `financials` | `jsonb` | nullable | `{ health_insurance, reimbursement, currency }` — `currency` is ISO 4217 |
 | `emergency_contact` | `jsonb` | nullable | `{ name, relation, phone, email, comments }` |
 | `medical_history` | `text` | nullable | Clinical history |
 | `medical_history_date` | `timestamp` | nullable | When history was last recorded |
@@ -124,14 +124,16 @@
 **jsonb Shapes:**
 ```json
 {
-  "address": { "street": "text", "postal_code": "text", "city": "text", "country": "text" },
-  "identity": { "document_type": "text", "country_national": "text", "scanned_document": "boolean" },
-  "financials": { "health_insurance": "text", "reimbursement": "text" },
+  "address": { "street": "text", "postal_code": "text", "city": "text", "country": "ISO 3166-1 alpha-2 (e.g. FR, US)" },
+  "identity": { "document_type": "text", "country_national": "ISO 3166-1 alpha-2 (e.g. FR, US)", "scanned_document": "boolean" },
+  "financials": { "health_insurance": "text", "reimbursement": "text", "currency": "ISO 4217 (e.g. EUR, USD)" },
   "emergency_contact": { "name": "text", "relation": "text", "phone": "text", "email": "text", "comments": "text" },
   "physicians": { "attending": "text", "correspondent": "text", "other": "text" },
   "transport_logistics": { "modes": { "public": "text", "taxi": "text", "ambulance": "text" }, "comments": "text" }
 }
 ```
+
+> **ISO Code Validation:** `address.country`, `identity.country_national` are validated against ISO 3166-1 alpha-2 codes. `financials.currency` is validated against ISO 4217 codes. Validation is enforced at the DTO level via `@IsIn()`. Display names are resolved on the frontend using `Intl.DisplayNames`.
 
 **Role-Based Read Visibility:**
 
