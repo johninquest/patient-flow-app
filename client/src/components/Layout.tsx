@@ -65,7 +65,7 @@ export default function Layout() {
         <div className="flex flex-col flex-1">
           {/* Brand */}
           <div className="flex items-center h-16 px-4 border-b border-border-default">
-            <h1 className="text-lg font-medium text-primary">ClinicFlow</h1>
+            <h1 className="text-lg font-medium text-primary">PatientFlow</h1>
           </div>
 
           {/* Navigation */}
@@ -124,7 +124,7 @@ export default function Layout() {
       {/* Mobile top bar */}
       <div className="lg:hidden bg-bg-surface border-b border-border-default">
         <div className="flex items-center justify-between h-16 px-4">
-          <h1 className="text-lg font-medium text-primary">ClinicFlow</h1>
+          <h1 className="text-lg font-medium text-primary">PatientFlow</h1>
           <div className="flex items-center gap-3">
             <select
               value={i18n.language}

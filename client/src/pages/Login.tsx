@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, FormInput, Button } from '../components/ui';
 
@@ -12,6 +13,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,15 +59,30 @@ export default function Login() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder={t('auth.email')}
             />
-            <FormInput
-              label={t('auth.password')}
-              id="password"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder={t('auth.password')}
-            />
+            <div className="relative">
+              <FormInput
+                label={t('auth.password')}
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder={t('auth.password')}
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
+                className="absolute right-3 top-9.5 text-text-secondary hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50 rounded-(--radius-control) p-0.5"
+              >
+                {showPassword ? (
+                  <EyeSlashIcon className="h-5 w-5" />
+                ) : (
+                  <EyeIcon className="h-5 w-5" />
+                )}
+              </button>
+            </div>
             <Button
               type="submit"
               disabled={loading}

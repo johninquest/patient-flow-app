@@ -30,7 +30,9 @@
     "signInWithGoogle": "Se connecter avec Google",
     "orDivider": "ou",
     "contactAdmin": "Besoin d'un compte ? Contactez votre administrateur.",
-    "accountSuspended": "Votre compte a été suspendu. Veuillez contacter votre administrateur."
+    "accountSuspended": "Votre compte a été suspendu. Veuillez contacter votre administrateur.",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe"
   },
   "nav": {
     "dashboard": "Tableau de bord",

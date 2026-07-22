@@ -1,6 +1,6 @@
 {
   "name": "patient-flow-api",
-  "version": "0.7.16",
+  "version": "0.7.22",
   "description": "Patient Flow API - Healthcare workflow orchestration",
   "author": "",
   "private": true,
@@ -19,6 +19,7 @@
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "migrate": "ts-node src/scripts/migrate.ts",
+    "db:migrate-country": "ts-node src/scripts/migrate-country-to-iso.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",

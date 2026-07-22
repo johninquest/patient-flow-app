@@ -30,7 +30,9 @@
     "signInWithGoogle": "Sign in with Google",
     "orDivider": "or",
     "contactAdmin": "Need an account? Contact your administrator.",
-    "accountSuspended": "Your account has been suspended. Please contact your administrator."
+    "accountSuspended": "Your account has been suspended. Please contact your administrator.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "nav": {
     "dashboard": "Dashboard",
